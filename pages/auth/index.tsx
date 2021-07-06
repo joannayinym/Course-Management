@@ -62,7 +62,7 @@ export default function Login() {
     const params: loginType = {
       email: values.email,
       // password: values.password,
-      password: "U2FsdGVkX19IAK0gcQBz3MjBX/fD0mHmEpNdMw9gcEM=",
+      password: "U2FsdGVkX18O2lDkYLuqkjHwXPxAkbR+HdVSoDqfFHg=",
       remember: values.remember,
       role: values.role,
     };
