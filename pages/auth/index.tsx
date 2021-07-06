@@ -5,6 +5,7 @@ import {
   Col,
   Form,
   Input,
+  message,
   Radio,
   RadioChangeEvent,
   Row,
@@ -46,11 +47,18 @@ export default function Login() {
   }, [router]);
 
   const login = async (loginParams: loginType) => {
-    const { data } = await axiosInstance.post("/login", loginParams);
-    if (!!data) {
-      localStorage.setItem("role", data.data.role);
-      localStorage.setItem("token", data.data.token);
-      router.push("/");
+    try {
+      const { data } = await axiosInstance.post("/login", loginParams);
+      if (!!data) {
+        localStorage.setItem("role", data.data.role);
+        localStorage.setItem("token", data.data.token);
+        router.push("/");
+      }
+    } catch (err) {
+      message.error(
+        "Something Wrong!! Please check your password or email",
+        30
+      );
     }
   };
 
