@@ -4,3 +4,9 @@ export interface loginType {
   role: string;
   remember: boolean;
 }
+
+export interface loginReturnType {
+  role: string;
+  token: string;
+  userId: string;
+}

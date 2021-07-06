@@ -29,7 +29,7 @@ export default function Signup() {
     const { data } = await axiosInstance.post("/signup", loginParams);
 
     if (!!data) {
-      localStorage.setItem("userInfo", data);
+      localStorage.setItem("token", data);
       console.log("loginInfo: ", data);
       router.push("/");
     }

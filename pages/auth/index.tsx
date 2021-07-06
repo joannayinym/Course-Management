@@ -39,7 +39,7 @@ export default function Login() {
   const router = useRouter();
 
   useEffect(() => {
-    const userInfo = localStorage.getItem("userInfo");
+    const userInfo = localStorage?.getItem("token");
     if (!!userInfo) {
       router.push("/");
     }
@@ -47,10 +47,9 @@ export default function Login() {
 
   const login = async (loginParams: loginType) => {
     const { data } = await axiosInstance.post("/login", loginParams);
-
     if (!!data) {
-      localStorage.setItem("userInfo", data);
-      console.log("loginInfo: ", data);
+      localStorage.setItem("role", data.data.role);
+      localStorage.setItem("token", data.data.token);
       router.push("/");
     }
   };
@@ -79,7 +78,8 @@ export default function Login() {
     <>
       <Row justify="center">
         <Col lg={8} md={16} sm={20} xs={23}>
-          <Title>Course Management Assistant</Title>
+          {/* <Title>Course Management Assistant</Title> */}
+          <Title>课程管理助手</Title>
         </Col>
       </Row>
       <Row justify="center">
@@ -102,33 +102,36 @@ export default function Login() {
             <Form.Item
               name="email"
               rules={[
-                { required: true, message: "'email' is required" },
+                { required: true, message: "请输入您的邮箱" },
                 { type: "email" },
               ]}
             >
               <Input
-                placeholder="Please input email"
+                placeholder="请输入您的邮箱"
                 prefix={<UserOutlined className="site-form-item-icon" />}
               />
             </Form.Item>
 
             <Form.Item
               name="password"
-              rules={[{ required: true, message: "'password' is required" }]}
+              rules={[
+                { required: true, message: "请输入您的密码" },
+                { min: 4, max: 16, message: "密码需要4-16个字符" },
+              ]}
             >
               <Input.Password
-                placeholder="Please input password"
+                placeholder="请输入密码"
                 prefix={<LockOutlined className="site-form-item-icon" />}
               />
             </Form.Item>
 
             <Form.Item name="remember" valuePropName="checked">
-              <Checkbox>Remember me</Checkbox>
+              <Checkbox>记住我</Checkbox>
             </Form.Item>
 
             <Form.Item>
               <Button type="primary" htmlType="submit" block>
-                Sign in
+                登录
               </Button>
             </Form.Item>
 

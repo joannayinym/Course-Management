@@ -1,4 +1,4 @@
-import { Button, Layout, Menu, Tooltip } from "antd";
+import { Button, Layout, Menu } from "antd";
 import {
   MenuUnfoldOutlined,
   MenuFoldOutlined,
@@ -25,7 +25,7 @@ const Title = styled.h1`
   color: white;
 `;
 
-export default function MainLayout() {
+export default function MainDashboard() {
   const [collapsed, setCollapsed] = useState(false);
   const [login, setLogin] = useState(false);
   const [userInfo, setUserInfo] = useState({ token: "", role: "" });
@@ -63,7 +63,7 @@ export default function MainLayout() {
         <Title>CMS</Title>
         <Menu theme="dark" mode="inline" defaultSelectedKeys={["1"]}>
           <Menu.Item key="1" icon={<UserOutlined />}>
-            <Link href="/">Student</Link>
+            <Link href="/dashboard/student">Student</Link>
           </Menu.Item>
           <Menu.Item key="2" icon={<VideoCameraOutlined />}>
             nav 2
@@ -91,14 +91,12 @@ export default function MainLayout() {
             icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
           />
           {login ? (
-            <Tooltip title="Logout">
-              <Button
-                type="primary"
-                shape="circle"
-                onClick={logout}
-                icon={<UserOutlined />}
-              />
-            </Tooltip>
+            <Button
+              type="primary"
+              shape="circle"
+              onClick={logout}
+              icon={<UserOutlined />}
+            />
           ) : null}
           {!login ? (
             <Button type="primary" onClick={loginHandler}>
@@ -114,12 +112,8 @@ export default function MainLayout() {
             minHeight: 480,
           }}
         >
-          {login ? (
-            <>
-              <div>Token: {userInfo?.token}</div>
-              <div>Role: {userInfo?.role}</div>
-            </>
-          ) : null}
+          <div>{userInfo?.token}</div>
+          <div>{userInfo?.role}</div>
         </Content>
       </Layout>
     </Layout>
