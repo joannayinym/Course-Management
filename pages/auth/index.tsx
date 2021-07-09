@@ -10,13 +10,14 @@ import {
   RadioChangeEvent,
   Row,
 } from "antd";
-import "antd/dist/antd.css";
 import styled from "styled-components";
+import crypto from "crypto-js";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { loginType } from "../../shared/auth";
+import { LoginType } from "../../shared/auth";
 import axiosInstance from "../../shared/axiosInstance";
+import storage from "../../shared/storage";
 
 const Title = styled.h1`
   font-size: 1.6em;
@@ -40,37 +41,35 @@ export default function Login() {
   const router = useRouter();
 
   useEffect(() => {
-    const userInfo = localStorage?.getItem("token");
+    const userInfo = storage.userInfo;
     if (!!userInfo) {
-      router.push("/");
+      router.push("/dashboard");
     }
   }, [router]);
 
-  const login = async (loginParams: loginType) => {
+  const login = async (loginParams: LoginType) => {
     try {
       const { data } = await axiosInstance.post("/login", loginParams);
       if (!!data) {
-        localStorage.setItem("role", data.data.role);
-        localStorage.setItem("token", data.data.token);
-        router.push("/");
+        storage.setUserInfo(data.data);
+        router.push("/dashboard");
       }
     } catch (err) {
       message.error(
         "Something Wrong!! Please check your password or email",
-        30
+        10
       );
     }
   };
 
   const onFinish = (values: any) => {
-    // var encryptedPasswoed = crypto.AES.encrypt(
-    //   "myString",
-    //   values.password
-    // ).toString();
-    const params: loginType = {
+    var encryptedPassword = crypto.AES.encrypt(
+      values.password,
+      "cms"
+    ).toString();
+    const params: LoginType = {
       email: values.email,
-      // password: values.password,
-      password: "U2FsdGVkX18O2lDkYLuqkjHwXPxAkbR+HdVSoDqfFHg=",
+      password: encryptedPassword,
       remember: values.remember,
       role: values.role,
     };
@@ -124,7 +123,12 @@ export default function Login() {
               name="password"
               rules={[
                 { required: true, message: "请输入您的密码" },
-                { min: 4, max: 16, message: "密码需要4-16个字符" },
+                {
+                  min: 4,
+                  max: 16,
+                  message: "密码需要4-16个字符",
+                  validateTrigger: "onBlur",
+                },
               ]}
             >
               <Input.Password

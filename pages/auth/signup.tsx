@@ -1,13 +1,12 @@
 import React from "react";
 import { Button, Col, Form, Input, Radio, RadioChangeEvent, Row } from "antd";
-import "antd/dist/antd.css";
 import styled from "styled-components";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { useRouter } from "next/router";
-import crypto from "crypto-js";
-import { loginType } from "../../shared/auth";
+import { LoginType } from "../../shared/auth";
 import axiosInstance from "../../shared/axiosInstance";
 import Link from "next/link";
+import storage from "../../shared/storage";
 
 const Title = styled.h1`
   font-size: 1.6em;
@@ -25,18 +24,17 @@ export default function Signup() {
 
   const router = useRouter();
 
-  const signup = async (loginParams: loginType) => {
+  const signup = async (loginParams: LoginType) => {
     const { data } = await axiosInstance.post("/signup", loginParams);
 
     if (!!data) {
-      localStorage.setItem("token", data);
-      console.log("loginInfo: ", data);
+      storage.setUserInfo(data);
       router.push("/");
     }
   };
 
   const onFinish = (values: any) => {
-    const params: loginType = {
+    const params: LoginType = {
       email: values.email,
       password: values.password,
       remember: values.remember,
