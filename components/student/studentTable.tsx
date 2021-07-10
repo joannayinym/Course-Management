@@ -6,9 +6,9 @@ import { Student, StudentInfo } from "../../shared/types";
 
 const columns = [
   {
-    key: "index",
     title: "No.",
-    dataIndex: "id",
+    key: "index",
+    render: (_1, _2, index) => index + 1,
   },
   {
     title: "Name",
@@ -49,14 +49,8 @@ export default function StudentTable() {
     const token = storage.token;
     const fetchData = async () => {
       try {
-        console.log("token: ", token);
         const { data } = await axiosInstance.get(
-          `/students?limit=${limit}&page=${page}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+          `/students?limit=${limit}&page=${page}`
         );
         setCurrentData(data.data);
       } catch (err) {

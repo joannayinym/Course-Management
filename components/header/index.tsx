@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
+import storage from "../../shared/storage";
 
 const SignIn = styled.li`
   @media screen and (min-width: 700px) {
@@ -37,7 +38,7 @@ export default function Header() {
   const [isLogin, setIsLogin] = useState(false);
 
   useEffect(() => {
-    const userInfo = localStorage?.getItem("token");
+    const userInfo = storage.userInfo;
     if (!!userInfo) setIsLogin(true);
   }, []);
 
@@ -63,9 +64,7 @@ export default function Header() {
           <SignIn>
             <MenuItemWrapper current={isLogin}>
               {isLogin ? (
-                <Link href={`/dashboard/${localStorage?.getItem("role")}`}>
-                  Dashboard
-                </Link>
+                <Link href={`/dashboard/${storage.role}`}>Dashboard</Link>
               ) : (
                 <Link href="/auth">Sign in</Link>
               )}

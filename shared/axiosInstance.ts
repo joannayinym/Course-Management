@@ -6,8 +6,21 @@ const axiosInstance = axios.create({
   headers: {
     "Content-Type": "application/json",
     "Access-Control-Allow-Origin": "*",
-    Authorization: "Bearer " + storage?.token,
   },
+});
+
+axiosInstance.interceptors.request.use((config) => {
+  if (!config.url.includes("login")) {
+    return {
+      ...config,
+      headers: {
+        ...config.headers,
+        Authorization: "Bearer " + storage?.token,
+      },
+    };
+  }
+
+  return config;
 });
 
 export default axiosInstance;

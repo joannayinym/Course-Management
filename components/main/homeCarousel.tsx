@@ -85,7 +85,7 @@ const SlideContentSpan = styled.span`
   }
 `;
 
-const SlideContentA = styled.a`
+const SlideContentA = styled.div`
   color: #fff;
   font-family: "BebasNeue";
   font-size: 40px;

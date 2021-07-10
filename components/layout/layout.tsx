@@ -12,6 +12,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import axiosInstance from "../../shared/axiosInstance";
 import storage from "../../shared/storage";
+import Sidebar from "./sidebar";
 
 const { Header, Sider, Content } = Layout;
 
@@ -30,7 +31,6 @@ export default function MainLayout(props: React.PropsWithChildren<any>) {
   const { children } = props;
   const [collapsed, setCollapsed] = useState(false);
   const [login, setLogin] = useState(false);
-  const [userInfo, setUserInfo] = useState({ token: "", role: "" });
 
   const router = useRouter();
 
@@ -43,7 +43,6 @@ export default function MainLayout(props: React.PropsWithChildren<any>) {
 
     if (!!userInfo) {
       setLogin(true);
-      setUserInfo(userInfo);
     }
   }, []);
 
@@ -52,25 +51,17 @@ export default function MainLayout(props: React.PropsWithChildren<any>) {
       await axiosInstance.post("/logout");
     } catch (err) {}
     setLogin(false);
-    setUserInfo({ token: "", role: "" });
     storage.deleteUserInfo();
+    router.push("/");
   };
 
   return (
     <Layout>
       <Sider trigger={null} collapsible collapsed={collapsed}>
-        <Title>CMS</Title>
-        <Menu theme="dark" mode="inline" defaultSelectedKeys={["1"]}>
-          <Menu.Item key="1" icon={<UserOutlined />}>
-            <Link href="/dashboard/student">Student</Link>
-          </Menu.Item>
-          <Menu.Item key="2" icon={<VideoCameraOutlined />}>
-            nav 2
-          </Menu.Item>
-          <Menu.Item key="3" icon={<UploadOutlined />}>
-            nav 3
-          </Menu.Item>
-        </Menu>
+        <Title>
+          <Link href="/">CMS</Link>
+        </Title>
+        <Sidebar />
       </Sider>
       <Layout className="site-layout">
         <Header
