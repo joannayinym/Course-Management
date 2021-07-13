@@ -110,29 +110,25 @@ const SlideContentA = styled.div`
 export default function HomeCarousel() {
   return (
     <>
-      <ul style={{ paddingInlineStart: 0 }}>
-        <Carousel autoplay>
-          {[1, 2, 3].map((item) => (
-            <li key={item}>
-              <Slide>
-                <SlideCoverTop />
-                <SlideContentWrapper>
-                  <SlideContent>
-                    <SlideContentH2>
-                      It’s Time to <br />
-                      <SlideContentSpan>Get back to school</SlideContentSpan>
-                    </SlideContentH2>
-                    <SlideContentA>
-                      <a href="#">Check out our new programs</a>
-                    </SlideContentA>
-                  </SlideContent>
-                </SlideContentWrapper>
-                <SlideCoverBottom />
-              </Slide>
-            </li>
-          ))}
-        </Carousel>
-      </ul>
+      <Carousel autoplay>
+        {[1, 2, 3].map((item) => (
+          <Slide key={item}>
+            <SlideCoverTop />
+            <SlideContentWrapper>
+              <SlideContent>
+                <SlideContentH2>
+                  It’s Time to <br />
+                  <SlideContentSpan>Get back to school</SlideContentSpan>
+                </SlideContentH2>
+                <SlideContentA>
+                  <a href="#">Check out our new programs</a>
+                </SlideContentA>
+              </SlideContent>
+            </SlideContentWrapper>
+            <SlideCoverBottom />
+          </Slide>
+        ))}
+      </Carousel>
     </>
   );
 }

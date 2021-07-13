@@ -10,7 +10,7 @@ const axiosInstance = axios.create({
 });
 
 axiosInstance.interceptors.request.use((config) => {
-  if (!config.url.includes("login")) {
+  if (config.url && !config.url.includes("login")) {
     return {
       ...config,
       headers: {

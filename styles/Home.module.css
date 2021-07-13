@@ -90,6 +90,10 @@
   width: 45%;
 }
 
+.site-layout-background {
+  background: #1b568e;
+}
+
 .card:hover,
 .card:focus,
 .card:active {

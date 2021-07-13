@@ -1,48 +1,67 @@
-import { Menu, Button } from "antd";
 import {
-  AppstoreOutlined,
-  PieChartOutlined,
-  DesktopOutlined,
-  ContainerOutlined,
-  MailOutlined,
+  DashboardOutlined,
+  DeploymentUnitOutlined,
+  EditOutlined,
+  FileAddOutlined,
+  MessageOutlined,
+  ProjectOutlined,
+  ReadOutlined,
+  SolutionOutlined,
+  TeamOutlined,
 } from "@ant-design/icons";
-import { useState } from "react";
-import Link from "next/link";
-
-const { SubMenu } = Menu;
-
-export default function Sidebar() {
-  const [collapsed, setCollapsed] = useState(false);
-
-  const toggleCollapsed = () => {
-    setCollapsed(!collapsed);
-  };
-
-  return (
-    <Menu
-      // defaultSelectedKeys={["1"]}
-      // defaultOpenKeys={["sub1"]}
-      mode="inline"
-      theme="dark"
-      inlineCollapsed={collapsed}
-    >
-      <Menu.Item key="1" icon={<PieChartOutlined />}>
-        Overview
-      </Menu.Item>
-      <SubMenu key="sub1" icon={<MailOutlined />} title="Student">
-        <Menu.Item key="student">
-          <Link href="/dashboard/student">Student</Link>
-        </Menu.Item>
-      </SubMenu>
-      <SubMenu key="sub2" icon={<MailOutlined />} title="Teacher">
-        <Menu.Item key="5">Teacher</Menu.Item>
-      </SubMenu>
-      <SubMenu key="sub3" icon={<MailOutlined />} title="Course">
-        <Menu.Item key="course">Course</Menu.Item>
-      </SubMenu>
-      <Menu.Item key="message" icon={<PieChartOutlined />}>
-        Message
-      </Menu.Item>
-    </Menu>
-  );
+export interface SideNav {
+  icon?: JSX.Element;
+  label: string;
+  path: string;
+  subNav?: SideNav[];
+  hide?: boolean;
 }
+
+const students: SideNav = {
+  path: "student",
+  label: "Student",
+  icon: <SolutionOutlined />,
+  subNav: [{ path: "", label: "Student List", icon: <TeamOutlined /> }],
+};
+
+const courses: SideNav = {
+  path: "courses",
+  label: "Course",
+  icon: <ReadOutlined />,
+  subNav: [
+    { path: "", label: "All Courses", icon: <ProjectOutlined /> },
+    { path: "addCourse", label: "Add Course", icon: <FileAddOutlined /> },
+    { path: "editCourse", label: "Edit Course", icon: <EditOutlined /> },
+  ],
+};
+
+const teachers: SideNav = {
+  path: "teachers",
+  label: "Teacher",
+  icon: <DeploymentUnitOutlined />,
+  subNav: [
+    {
+      path: "",
+      label: "Teacher List",
+      icon: <TeamOutlined />,
+    },
+  ],
+};
+
+const overview: SideNav = {
+  path: "",
+  label: "Overview",
+  icon: <DashboardOutlined />,
+};
+
+const messages: SideNav = {
+  path: "message",
+  label: "Message",
+  icon: <MessageOutlined />,
+};
+
+export const sidebar = {
+  manager: [overview, students, teachers, courses, messages],
+  teacher: [overview, students, courses, messages],
+  student: [overview, messages],
+};

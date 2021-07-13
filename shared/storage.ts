@@ -1,6 +1,6 @@
-import { LoginReturnType, Role } from "./types";
+import { LoginResponse, Role } from "./types/user";
 
-export type UserInfo = LoginReturnType;
+export type UserInfo = LoginResponse;
 
 export class Storage {
   private key = "cms";
@@ -9,24 +9,24 @@ export class Storage {
     localStorage.setItem(this.key, JSON.stringify(info));
   }
 
-  get userInfo(): UserInfo {
+  get userInfo(): UserInfo | null {
     try {
-      return JSON.parse(localStorage.getItem(this.key)) as UserInfo;
+      return JSON.parse(localStorage.getItem(this.key) ?? "{}") as UserInfo;
     } catch (error) {
       return null;
     }
   }
 
-  get token(): string | null {
+  get token(): string | undefined {
     return this.userInfo?.token;
   }
 
-  get role(): Role {
+  get role(): Role | undefined {
     return this.userInfo?.role;
   }
 
   get userId(): number {
-    return +this.userInfo?.userId;
+    return this.userInfo ? +this.userInfo?.userId : 0;
   }
 
   deleteUserInfo(): void {

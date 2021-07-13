@@ -15,9 +15,10 @@ import crypto from "crypto-js";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { LoginType } from "../../shared/auth";
 import axiosInstance from "../../shared/axiosInstance";
 import storage from "../../shared/storage";
+import { LoginRequest } from "../../shared/types/user";
+import apiService from "../../shared/api/apiServices";
 
 const Title = styled.h1`
   font-size: 1.6em;
@@ -36,22 +37,30 @@ const userOptions = [
 ];
 
 export default function Login() {
-  const [form] = Form.useForm();
-
+  const [form] = Form.useForm<LoginRequest>();
   const router = useRouter();
 
   useEffect(() => {
-    const userInfo = storage.userInfo;
-    if (!!userInfo) {
+    if (storage.token) {
       router.push("/dashboard");
     }
   }, [router]);
 
-  const login = async (loginParams: LoginType) => {
+  const onFinish = async (values: LoginRequest) => {
+    var encryptedPassword = crypto.AES.encrypt(
+      values.password,
+      "cms"
+    ).toString();
+    const params: LoginRequest = {
+      email: values.email,
+      password: encryptedPassword,
+      remember: values.remember,
+      role: values.role,
+    };
     try {
-      const { data } = await axiosInstance.post("/login", loginParams);
+      const { data } = await apiService.login(params);
       if (!!data) {
-        storage.setUserInfo(data.data);
+        storage.setUserInfo(data);
         router.push("/dashboard");
       }
     } catch (err) {
@@ -60,20 +69,6 @@ export default function Login() {
         10
       );
     }
-  };
-
-  const onFinish = (values: any) => {
-    var encryptedPassword = crypto.AES.encrypt(
-      values.password,
-      "cms"
-    ).toString();
-    const params: LoginType = {
-      email: values.email,
-      password: encryptedPassword,
-      remember: values.remember,
-      role: values.role,
-    };
-    login(params);
   };
 
   const onChangeUserType = (e: RadioChangeEvent) => {
@@ -85,7 +80,6 @@ export default function Login() {
     <>
       <Row justify="center">
         <Col lg={8} md={16} sm={20} xs={23}>
-          {/* <Title>Course Management Assistant</Title> */}
           <Title>课程管理助手</Title>
         </Col>
       </Row>

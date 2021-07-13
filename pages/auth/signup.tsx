@@ -3,10 +3,10 @@ import { Button, Col, Form, Input, Radio, RadioChangeEvent, Row } from "antd";
 import styled from "styled-components";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { useRouter } from "next/router";
-import { LoginType } from "../../shared/auth";
 import axiosInstance from "../../shared/axiosInstance";
 import Link from "next/link";
 import storage from "../../shared/storage";
+import { RegisterRequest } from "../../shared/types/user";
 
 const Title = styled.h1`
   font-size: 1.6em;
@@ -24,8 +24,8 @@ export default function Signup() {
 
   const router = useRouter();
 
-  const signup = async (loginParams: LoginType) => {
-    const { data } = await axiosInstance.post("/signup", loginParams);
+  const signup = async (req: RegisterRequest) => {
+    const { data } = await axiosInstance.post("/signup", req);
 
     if (!!data) {
       storage.setUserInfo(data);
@@ -34,10 +34,9 @@ export default function Signup() {
   };
 
   const onFinish = (values: any) => {
-    const params: LoginType = {
+    const params: RegisterRequest = {
       email: values.email,
       password: values.password,
-      remember: values.remember,
       role: values.role,
     };
     if (signup(params)) {

@@ -39,7 +39,7 @@ export default function Header() {
 
   useEffect(() => {
     const userInfo = storage.userInfo;
-    if (!!userInfo) setIsLogin(true);
+    if (userInfo?.token) setIsLogin(true);
   }, []);
 
   const handleClick = (e: any) => {
