@@ -1,6 +1,14 @@
 import { AxiosError } from "axios";
 import axiosInstance from "../axiosInstance";
-import { StudentRequest, StudentResponse } from "../types/student";
+import {
+  AddStudentRequest,
+  AddStudentResponse,
+  Student,
+  StudentsRequest,
+  StudentsResponse,
+  UpdateStudentRequest,
+  UpdateStudentResponse,
+} from "../types/student";
 import { IResponse, QueryParams } from "../types/type";
 import { LoginRequest, LoginResponse } from "../types/user";
 
@@ -31,11 +39,41 @@ class ApiService {
       .catch(this.errorHandler);
   }
 
-  getStudents(req: StudentRequest): Promise<IResponse<StudentResponse>> {
+  getStudents(req: StudentsRequest): Promise<IResponse<StudentsResponse>> {
     return axiosInstance
-      .get<IResponse<StudentResponse>>(
+      .get<IResponse<StudentsResponse>>(
         `/students?${this.paramsSerializer(req as unknown as QueryParams)}`
       )
+      .then((res) => res.data)
+      .catch(this.errorHandler);
+  }
+
+  getStudentById(id: string): Promise<IResponse<Student>> {
+    return axiosInstance
+      .get<IResponse<Student>>(`/students/${id}`)
+      .then((res) => res.data)
+      .catch(this.errorHandler);
+  }
+
+  addStudent(req: AddStudentRequest): Promise<IResponse<AddStudentResponse>> {
+    return axiosInstance
+      .post<IResponse<AddStudentResponse>>("/students", req)
+      .then((res) => res.data)
+      .catch(this.errorHandler);
+  }
+
+  updateStudent(
+    req: UpdateStudentRequest
+  ): Promise<IResponse<UpdateStudentResponse>> {
+    return axiosInstance
+      .put<IResponse<UpdateStudentResponse>>("/students", req)
+      .then((res) => res.data)
+      .catch(this.errorHandler);
+  }
+
+  deleteStudent(id: number): Promise<IResponse<boolean>> {
+    return axiosInstance
+      .delete<IResponse<boolean>>(`/students/${id}`)
       .then((res) => res.data)
       .catch(this.errorHandler);
   }

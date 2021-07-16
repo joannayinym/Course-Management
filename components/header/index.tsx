@@ -16,7 +16,6 @@ const HeaderWrapper = styled.div`
   width: 100%;
   height: 100px;
   margin: 0 auto;
-  float: center;
 `;
 
 const MenuItemWrapper = styled.span`

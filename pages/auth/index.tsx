@@ -15,7 +15,6 @@ import crypto from "crypto-js";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import axiosInstance from "../../shared/axiosInstance";
 import storage from "../../shared/storage";
 import { LoginRequest } from "../../shared/types/user";
 import apiService from "../../shared/api/apiServices";
@@ -47,7 +46,7 @@ export default function Login() {
   }, [router]);
 
   const onFinish = async (values: LoginRequest) => {
-    var encryptedPassword = crypto.AES.encrypt(
+    const encryptedPassword = crypto.AES.encrypt(
       values.password,
       "cms"
     ).toString();
