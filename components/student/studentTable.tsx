@@ -17,6 +17,7 @@ import { Paginator } from "../../shared/types/type";
 import Input from "antd/lib/input";
 import { businessAreas } from "../../shared/constants/role";
 import AddAndEditStudent from "./addAndEditStudent";
+import Link from "next/link";
 
 const TableHeaderWrapper = styled.div`
   display: flex;
@@ -58,6 +59,12 @@ export default function StudentTable() {
         const nextCode = next.name.charCodeAt(0);
         return preCode > nextCode ? 1 : preCode === nextCode ? 0 : -1;
       },
+      // eslint-disable-next-line react/display-name
+      render: (_, record: Student) => (
+        <Link href={`/dashboard/manager/students/${record.id}`} passHref>
+          {record.name}
+        </Link>
+      ),
     },
     {
       title: "Area",

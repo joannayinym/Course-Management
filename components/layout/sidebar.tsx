@@ -12,7 +12,7 @@ import {
 import { Menu } from "antd";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Role } from "../../shared/types/user";
 export interface SideNav {
   icon?: JSX.Element;
@@ -82,7 +82,11 @@ export function MenuGenerator({ userRole }: { userRole: Role | undefined }) {
     const menuList = path[1].split("/");
     if (menuList.length > 2) {
       openKeys = [menuList[1]];
-      selectedKeys = [`${menuList[1]}-${menuList[2]}`];
+      if (menuList[2].includes("[")) {
+        selectedKeys = [`${menuList[1]}-`];
+      } else {
+        selectedKeys = [`${menuList[1]}-${menuList[2]}`];
+      }
     } else if (menuList.length > 1) {
       openKeys = [menuList[1]];
       selectedKeys = [`${menuList[1]}-`];
