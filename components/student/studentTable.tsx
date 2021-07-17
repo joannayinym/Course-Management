@@ -165,9 +165,6 @@ export default function StudentTable() {
     onChange: (page: number, pageSize?: number | undefined) => {
       setPaginator({ page, limit: pageSize || 20 });
     },
-    onShowSizeChange: (page: number, pageSize?: number | undefined) => {
-      setPaginator({ page: 1, limit: pageSize || 20 });
-    },
   };
 
   const onAddOrEdit = (student: Student) => {

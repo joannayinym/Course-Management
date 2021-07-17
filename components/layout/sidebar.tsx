@@ -95,8 +95,8 @@ export function MenuGenerator({ userRole }: { userRole: Role | undefined }) {
 
   return (
     <Menu
-      defaultSelectedKeys={selectedKeys}
       defaultOpenKeys={openKeys}
+      defaultSelectedKeys={selectedKeys}
       mode="inline"
       theme="dark"
       inlineCollapsed={true}
