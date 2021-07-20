@@ -1,9 +1,11 @@
 import { AxiosError } from "axios";
 import axiosInstance from "../axiosInstance";
+import { Country } from "../types/others";
 import {
   AddStudentRequest,
   AddStudentResponse,
   Student,
+  StudentProfile,
   StudentsRequest,
   StudentsResponse,
   UpdateStudentRequest,
@@ -48,9 +50,16 @@ class ApiService {
       .catch(this.errorHandler);
   }
 
-  getStudentById(id: string): Promise<IResponse<Student>> {
+  getStudentById(id: number): Promise<IResponse<StudentProfile>> {
     return axiosInstance
-      .get<IResponse<Student>>(`/students/${id}`)
+      .get<IResponse<StudentProfile>>(`/students/${id}`)
+      .then((res) => res.data)
+      .catch(this.errorHandler);
+  }
+
+  getCountries(): Promise<IResponse<Country[]>> {
+    return axiosInstance
+      .get<IResponse<Country[]>>("/countries")
       .then((res) => res.data)
       .catch(this.errorHandler);
   }

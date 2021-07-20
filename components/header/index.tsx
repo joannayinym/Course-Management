@@ -18,15 +18,14 @@ const HeaderWrapper = styled.div`
   margin: 0 auto;
 `;
 
-const MenuItemWrapper = styled.span`
+const MenuItemWrapper = styled.div`
   height: 100px;
   display: flex;
   align-items: center;
   font-size: 21px;
   color: #8c929c;
   font-family: "BebasNeue";
-  color: ${(props) => (props.current ? "#008bc4" : "#8c929c")} !important;
-  text-decoration: ${(props) => (props.current ? "underline" : "none")};
+  text-decoration: "none";
 `;
 
 export default function Header() {
@@ -49,19 +48,19 @@ export default function Header() {
       <Affix offsetTop={0}>
         <Menu onClick={handleClick} selectedKeys={[current]} mode="horizontal">
           <Menu.Item key="courses">
-            <MenuItemWrapper current={isGallery}>Courses</MenuItemWrapper>
+            <MenuItemWrapper>Courses</MenuItemWrapper>
           </Menu.Item>
           <Menu.Item key="events">
-            <MenuItemWrapper current={isEvents}>Events</MenuItemWrapper>
+            <MenuItemWrapper>Events</MenuItemWrapper>
           </Menu.Item>
           <Menu.Item key="students">
-            <MenuItemWrapper current={isGallery}>Students</MenuItemWrapper>
+            <MenuItemWrapper>Students</MenuItemWrapper>
           </Menu.Item>
           <Menu.Item key="teachers">
-            <MenuItemWrapper current={true}>Teachers</MenuItemWrapper>
+            <MenuItemWrapper>Teachers</MenuItemWrapper>
           </Menu.Item>
           <SignIn>
-            <MenuItemWrapper current={isLogin}>
+            <MenuItemWrapper>
               {isLogin ? (
                 <Link href={`/dashboard/${storage.role}`}>Dashboard</Link>
               ) : (

@@ -12,6 +12,7 @@ import storage from "../../shared/storage";
 import { MenuGenerator } from "./sidebar";
 import { Role } from "../../shared/types/user";
 import apiService from "../../shared/api/apiServices";
+import AppBreadCrumb from "./breadCrumb";
 
 const { Header, Sider, Content } = Layout;
 
@@ -96,11 +97,13 @@ export default function MainLayout(props: React.PropsWithChildren<any>) {
             </Tooltip>
           ) : null}
         </Header>
+        <AppBreadCrumb />
         <Content
           style={{
             margin: "24px 16px",
-            padding: 24,
+            padding: 16,
             minHeight: 1000,
+            backgroundColor: "#fff",
           }}
         >
           {children}

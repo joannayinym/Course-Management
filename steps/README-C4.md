@@ -44,15 +44,7 @@
 
 ## Table Pagination
 
-设置 pagination 的 config 信息，包括
-
-- current
-- pageSize
-- total
-- showSizeChanger
-- showTotal
-- onChange
-- onShowSizeChange
+设置 pagination 的 config 信息，
 
 ## Sort
 

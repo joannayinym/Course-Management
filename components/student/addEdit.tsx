@@ -2,7 +2,7 @@ import { Button, Form, Input, Select } from "antd";
 import React from "react";
 import styled from "styled-components";
 import apiService from "../../shared/api/apiServices";
-import { businessAreas } from "../../shared/constants/role";
+import { Country } from "../../shared/types/others";
 import { AddStudentRequest, Student } from "../../shared/types/student";
 
 const ModalFormSubmit = styled(Form.Item)`
@@ -14,15 +14,21 @@ const ModalFormSubmit = styled(Form.Item)`
 
 const { Option } = Select;
 
-interface IProps {
+interface AddEditStudentProps {
   actionType: string;
   student: Student | null;
+  countries: Country[];
   onSubmit: (value: Student) => void;
 }
 
-export default function AddAndEditStudent(props: IProps) {
+enum StudentType {
+  tester = 1,
+  developer,
+}
+
+export default function AddEditStudent(props: AddEditStudentProps) {
   const [form] = Form.useForm();
-  const { actionType, student, onSubmit } = props;
+  const { actionType, student, countries, onSubmit } = props;
   const layout = {
     labelCol: { span: 8 },
     wrapperCol: { span: 16 },
@@ -63,6 +69,7 @@ export default function AddAndEditStudent(props: IProps) {
         <Form.Item
           name="email"
           label="Email"
+          validateFirst
           rules={[
             { type: "email", validateTrigger: "onBlur" },
             { required: true },
@@ -70,25 +77,28 @@ export default function AddAndEditStudent(props: IProps) {
         >
           <Input />
         </Form.Item>
+
         <Form.Item name="country" label="Area" rules={[{ required: true }]}>
           <Select placeholder="Select a Country">
-            {businessAreas.map((item, index) => (
-              <Select.Option value={item} key={index}>
-                {item}
+            {countries?.map((item) => (
+              <Select.Option value={item.en} key={item.en}>
+                {item.en}
               </Select.Option>
             ))}
           </Select>
         </Form.Item>
+
         <Form.Item
           name="typeId"
           label="Student Type"
           rules={[{ required: true }]}
         >
           <Select placeholder="Select the Type">
-            <Option value={1}>tester</Option>
-            <Option value={2}>developer</Option>
+            <Option value={StudentType.tester}>tester</Option>
+            <Option value={StudentType.developer}>developer</Option>
           </Select>
         </Form.Item>
+
         <ModalFormSubmit>
           <Button type="primary" htmlType="submit">
             {actionType === "Edit" ? "Update" : "Add"}

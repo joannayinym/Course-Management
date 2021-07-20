@@ -15,9 +15,9 @@ import {
 } from "../../shared/types/student";
 import { Paginator } from "../../shared/types/type";
 import Input from "antd/lib/input";
-import { businessAreas } from "../../shared/constants/role";
-import AddAndEditStudent from "./addAndEditStudent";
+import AddEditStudent from "./addEdit";
 import Link from "next/link";
+import { Country } from "../../shared/types/others";
 
 const TableHeaderWrapper = styled.div`
   display: flex;
@@ -39,7 +39,7 @@ export default function StudentTable() {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [actionType, setActionType] = useState<string>("Add");
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
-
+  const [countries, setCountries] = useState<Country[]>([]);
   const debouncedQuery = debounce(
     (event: ChangeEvent<HTMLInputElement>) => setQuery(event.target.value),
     1000
@@ -57,6 +57,7 @@ export default function StudentTable() {
       sorter: (pre: Student, next: Student) => {
         const preCode = pre.name.charCodeAt(0);
         const nextCode = next.name.charCodeAt(0);
+
         return preCode > nextCode ? 1 : preCode === nextCode ? 0 : -1;
       },
       // eslint-disable-next-line react/display-name
@@ -69,7 +70,7 @@ export default function StudentTable() {
     {
       title: "Area",
       dataIndex: "country",
-      filters: businessAreas.map((item) => ({ text: item, value: item })),
+      filters: countries.map((item) => ({ text: item.en, value: item.en })),
       onFilter: (value: string | number | boolean, record: Student) =>
         record.country.includes(value.toString()),
     },
@@ -141,20 +142,6 @@ export default function StudentTable() {
       },
     },
   ];
-  useEffect(() => {
-    (async () => {
-      const params: StudentsRequest = query
-        ? { ...paginator, query }
-        : paginator;
-      try {
-        const { data } = await apiService.getStudents(params);
-        setCurrentData(data?.students || []);
-        setTotal(data?.total || 0);
-      } catch (err) {
-        message.error("Something Wrong!!!", 10);
-      }
-    })();
-  }, [paginator, query]);
 
   const paginationProps: TablePaginationConfig = {
     current: paginator.page,
@@ -164,6 +151,9 @@ export default function StudentTable() {
     showTotal: (total: number) => `Total ${total} items`,
     onChange: (page: number, pageSize?: number | undefined) => {
       setPaginator({ page, limit: pageSize || 20 });
+    },
+    onShowSizeChange: (page: number, pageSize?: number | undefined) => {
+      setPaginator({ page: 1, limit: pageSize || 20 });
     },
   };
 
@@ -183,6 +173,34 @@ export default function StudentTable() {
     setShowModal(false);
     setSelectedStudent(null);
   };
+
+  useEffect(() => {
+    (async () => {
+      const params: StudentsRequest = query
+        ? { ...paginator, query }
+        : paginator;
+      try {
+        const { data } = await apiService.getStudents(params);
+        setCurrentData(data?.students || []);
+        setTotal(data?.total || 0);
+      } catch (err) {
+        message.error("Something Wrong!!!", 10);
+      }
+    })();
+  }, [paginator, query]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data } = await apiService.getCountries();
+        if (!!data) {
+          setCountries(data);
+        }
+      } catch (error) {
+        message.error("Something Wrong!!!", 10);
+      }
+    })();
+  }, []);
 
   return (
     <>
@@ -219,9 +237,10 @@ export default function StudentTable() {
           </Button>,
         ]}
       >
-        <AddAndEditStudent
+        <AddEditStudent
           actionType={actionType}
           student={selectedStudent}
+          countries={countries}
           onSubmit={onAddOrEdit}
         />
       </Modal>

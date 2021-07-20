@@ -1,3 +1,4 @@
+import { Course } from "./course";
 import { Paginator } from "./type";
 
 export interface StudentsRequest {
@@ -50,3 +51,24 @@ export interface UpdateStudentRequest extends AddStudentRequest {
 }
 
 export type UpdateStudentResponse = Student;
+
+export interface StudentProfile {
+  id: number;
+  name: string;
+  type: BaseType;
+  country: string;
+  email: string;
+  address: string;
+  phone: number;
+  ctime: string;
+  gender: number;
+  education: string;
+  age: number;
+  interest: string[];
+  avatar: string;
+  memberStartAt: string;
+  memberEndAt: string;
+  updateAt: string;
+  description: string;
+  courses: Course[];
+}

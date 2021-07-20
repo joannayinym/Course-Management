@@ -35,8 +35,8 @@ const courses: SideNav = {
   icon: <ReadOutlined />,
   subNav: [
     { path: "", label: "All Courses", icon: <ProjectOutlined /> },
-    { path: "addCourse", label: "Add Course", icon: <FileAddOutlined /> },
-    { path: "editCourse", label: "Edit Course", icon: <EditOutlined /> },
+    { path: "add-course", label: "Add Course", icon: <FileAddOutlined /> },
+    { path: "edit-course", label: "Edit Course", icon: <EditOutlined /> },
   ],
 };
 
