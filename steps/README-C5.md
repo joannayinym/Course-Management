@@ -20,14 +20,14 @@
 
 # 问题：
 
-- 从 student detail 回到 student 时后端显示路由数据和前端显示不一样，正在找原因
+- 从 student detail 回到 student 时 Terminal 显示路由数据和 Inspect 窗口显示不一样，正在找原因
 
-1. 后端：
+1. Terminal：
    pathInfo: [
    { href: '/dashboard/undefined', label: 'CMS(undefined)' },
    { href: '/dashboard/manager/students', label: 'Student' }
    ]
-2. 前端：
+2. Inspect：
    pathInfo:  
    0:
    href: "/dashboard/manager"
