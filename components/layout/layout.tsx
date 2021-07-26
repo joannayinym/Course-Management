@@ -32,8 +32,6 @@ const Title = styled.a`
     rgb(63, 81, 181) 0px 0px 98px;
 `;
 
-const { SubMenu } = Menu;
-
 export default function MainLayout(props: React.PropsWithChildren<any>) {
   const { children } = props;
   const [collapsed, setCollapsed] = useState(false);

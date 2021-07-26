@@ -14,6 +14,7 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import React from "react";
 import { Role } from "../../shared/types/user";
+import { generateKey, getActiveKey } from "../../shared/utils/sideNav";
 export interface SideNav {
   icon?: JSX.Element;
   label: string;
@@ -25,6 +26,7 @@ export interface SideNav {
 const students: SideNav = {
   path: "students",
   label: "Student",
+  hide: true,
   icon: <SolutionOutlined />,
   subNav: [{ path: "", label: "Student List", icon: <TeamOutlined /> }],
 };
@@ -32,6 +34,7 @@ const students: SideNav = {
 const courses: SideNav = {
   path: "courses",
   label: "Course",
+  hide: true,
   icon: <ReadOutlined />,
   subNav: [
     { path: "", label: "All Courses", icon: <ProjectOutlined /> },
@@ -43,6 +46,7 @@ const courses: SideNav = {
 const teachers: SideNav = {
   path: "teachers",
   label: "Teacher",
+  hide: true,
   icon: <DeploymentUnitOutlined />,
   subNav: [
     {
@@ -71,66 +75,55 @@ export const sidebar = {
   student: [overview, messages],
 };
 
-const { SubMenu } = Menu;
+function renderMenuItems(
+  data: SideNav[],
+  parent: string = "",
+  userRole: string = "student"
+): JSX.Element[] {
+  return data.map((item, index) => {
+    const key = generateKey(item, index);
+
+    if (item.subNav && !!item.subNav.length) {
+      return (
+        <Menu.SubMenu key={key} title={item.label} icon={item.icon}>
+          {renderMenuItems(item.subNav, item.path + "/", userRole)}
+        </Menu.SubMenu>
+      );
+    } else {
+      return (
+        <Menu.Item key={key} title={item.label} icon={item.icon}>
+          {item.label.toLocaleLowerCase() === "overview" ? (
+            <Link href={`/dashboard/${userRole}/${parent}`}>{item.label}</Link>
+          ) : (
+            <Link href={`/dashboard/${userRole}/${parent}${item.path}`}>
+              {item.label}
+            </Link>
+          )}
+        </Menu.Item>
+      );
+    }
+  });
+}
 
 export function MenuGenerator({ userRole }: { userRole: Role | undefined }) {
-  let selectedKeys: string[] = [""];
-  let openKeys: string[] = [];
   const router = useRouter();
-  const path = router.pathname.split("dashboard/");
-  if (path && path.length > 1) {
-    const menuList = path[1].split("/");
-    if (menuList.length > 2) {
-      openKeys = [menuList[1]];
-      if (menuList[2].includes("[")) {
-        selectedKeys = [`${menuList[1]}-`];
-      } else {
-        selectedKeys = [`${menuList[1]}-${menuList[2]}`];
-      }
-    } else if (menuList.length > 1) {
-      openKeys = [menuList[1]];
-      selectedKeys = [`${menuList[1]}-`];
-    }
-  }
+  const path = router.pathname;
+  const paths = path.split("/");
+  const role = userRole || paths.length > 2 ? paths[2] : undefined;
+  const key = getActiveKey(sidebar[role], path, role);
+  const defaultSelectedKeys = [key.split("/").pop()];
+  const defaultOpenKeys = key.split("/").slice(0, -1);
+  const menuItems = renderMenuItems(sidebar[role], "", role);
 
   return (
     <Menu
-      defaultOpenKeys={openKeys}
-      defaultSelectedKeys={selectedKeys}
+      defaultOpenKeys={defaultOpenKeys}
+      defaultSelectedKeys={defaultSelectedKeys}
       mode="inline"
       theme="dark"
       inlineCollapsed={true}
     >
-      {userRole &&
-        sidebar[userRole].map((item: SideNav) => {
-          if (!item.subNav) {
-            return (
-              <Menu.Item key={item.path} icon={item.icon}>
-                <Link href={`/dashboard/${userRole}/${item.path}`}>
-                  {item.label}
-                </Link>
-              </Menu.Item>
-            );
-          } else {
-            const subMenu = item.subNav.map((subItem: SideNav) => (
-              <Menu.Item
-                key={`${item.path}-${subItem.path}`}
-                icon={subItem.icon}
-              >
-                <Link
-                  href={`/dashboard/${userRole}/${item.path}/${subItem.path}`}
-                >
-                  {subItem.label}
-                </Link>
-              </Menu.Item>
-            ));
-            return (
-              <SubMenu key={item.path} icon={item.icon} title={item.label}>
-                {subMenu}
-              </SubMenu>
-            );
-          }
-        })}
+      {menuItems}
     </Menu>
   );
 }

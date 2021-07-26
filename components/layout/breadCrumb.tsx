@@ -1,96 +1,52 @@
 import { Breadcrumb } from "antd";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import React from "react";
-import storage from "../../shared/storage";
-import { sidebar } from "./sidebar";
+import {
+  deepSearchRecordFactory,
+  getSideNavNameByPath,
+} from "../../shared/utils/sideNav";
+import { sidebar, SideNav } from "./sidebar";
 
-export default function AppBreadCrumb() {
+export default function AppBreadCrumb(userRole: string) {
   const router = useRouter();
-  const userRole = storage?.userInfo?.role;
-  let pathInfo: { href: string; label: string }[] = [
-    {
-      href: `/dashboard/${userRole}`,
-      label: `CMS(${userRole?.toLocaleUpperCase()})`,
-    },
-  ];
-  const path = router.pathname.split("dashboard/");
-  if (path && path.length > 1) {
-    const menuList = path[1].split("/");
-    if (menuList.length === 1) {
-      pathInfo = [
-        ...pathInfo,
-        {
-          href: `/dashboard/${menuList[0]}`,
-          label: "Overview",
-        },
-      ];
-    } else if (menuList.length === 2) {
-      sidebar[menuList[0]].forEach((item) => {
-        if (item.path === menuList[1]) {
-          pathInfo = [
-            ...pathInfo,
-            {
-              href: `/dashboard/${menuList[0]}/${item.path}`,
-              label: item.label,
-            },
-          ];
-        }
-      });
-    } else if (menuList.length === 3) {
-      if (menuList[2].includes("[")) {
-        sidebar[menuList[0]].forEach((item) => {
-          if (item.path === menuList[1]) {
-            pathInfo = [
-              ...pathInfo,
-
-              {
-                href: `/dashboard/${menuList[0]}/${item.path}`,
-                label: item.label,
-              },
-            ];
-            pathInfo = [
-              ...pathInfo,
-              {
-                href: "",
-                label: "Detail",
-              },
-            ];
-          }
-        });
-      } else {
-        sidebar[menuList[0]].forEach((item) => {
-          if (item.path === menuList[1]) {
-            pathInfo = [
-              ...pathInfo,
-              {
-                href: `/dashboard/${menuList[0]}/${item.path}`,
-                label: item.label,
-              },
-            ];
-            item.subNav.forEach((subItem) => {
-              if (subItem.path === menuList[2]) {
-                pathInfo = [
-                  ...pathInfo,
-                  {
-                    href: "",
-                    label: subItem.label,
-                  },
-                ];
-              }
-            });
-          }
-        });
-      }
-    }
-  }
+  const path = router.pathname;
+  const paths = path.split("/").slice(1);
+  const root = "/" + paths.slice(0, 2).join("/");
+  const role =
+    userRole || path.split("/").length > 2 ? path.split("/")[2] : undefined;
+  const names = getSideNavNameByPath(sidebar[role], path, role) || [];
 
   return (
-    <Breadcrumb separator=">">
-      {pathInfo.map((item, index) => (
-        <Breadcrumb.Item key={index} href={item.href}>
-          {item.label}
-        </Breadcrumb.Item>
-      ))}
+    <Breadcrumb style={{ margin: "0 16px", padding: 16 }}>
+      <Breadcrumb.Item key={root}>
+        <Link href={root}>{`CMS ${role.toLocaleUpperCase()} SYSTEM`}</Link>
+      </Breadcrumb.Item>
+      {names.map((name, index) => {
+        if (name === "Detail") {
+          return <Breadcrumb.Item key={index}>Detail</Breadcrumb.Item>;
+        }
+
+        const record = deepSearchRecordFactory(
+          (nav: SideNav, value: any) => nav.label === value
+        )(sidebar[role], name);
+
+        const isText =
+          index === names.length - 1 || record.every((item) => item.hide);
+
+        let subPath = record
+          .map((item) => item.path)
+          .reduce((acc, cur) => [...acc, cur], [])
+          .filter((item) => !!item)
+          .join("/");
+        subPath = subPath.endsWith("/") ? subPath.slice(0, -1) : subPath;
+
+        return (
+          <Breadcrumb.Item key={index}>
+            {isText ? name : <Link href={`${root}/${subPath}`}>{name}</Link>}
+          </Breadcrumb.Item>
+        );
+      })}
     </Breadcrumb>
   );
 }
