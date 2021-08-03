@@ -78,7 +78,6 @@ export const getActiveKey = (
   const { paths, keys } = memoizedGetKeyPathInfo(data, userRole);
   const isEqual = isPathEqual(activeRoute);
   const index = paths.findIndex(isEqual);
-
   return keys[index] || "";
 };
 
@@ -99,9 +98,9 @@ export const getSideNavNameByPath = (
   return isDetail ? [...result, "Detail"] : result;
 };
 
-type CheckFn = (data: SideNav, value: any) => boolean;
+type CheckFn = (data: SideNav, value: string) => boolean;
 
-export const deepSearchRecordFactory = (chechFn: CheckFn) => {
+export const deepSearchRecordFactory = (checkFn: CheckFn) => {
   return function search(
     menu: SideNav[],
     node: string,
@@ -111,7 +110,7 @@ export const deepSearchRecordFactory = (chechFn: CheckFn) => {
 
     const [firstNode, ...restNodes] = menu;
 
-    if (chechFn(firstNode, node)) {
+    if (checkFn(firstNode, node)) {
       record.unshift(firstNode);
       return record;
     }

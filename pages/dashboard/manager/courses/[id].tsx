@@ -1,20 +1,65 @@
-import { Avatar, Card, Col, message, Row, Table, Tabs, Tag } from "antd";
-import { ColumnType } from "antd/lib/table";
+import { Badge, Card, Col, Collapse, Row, Steps, Tag } from "antd";
 import { useRouter } from "next/router";
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
+import ClassTime from "../../../../components/course/classTime";
+import CourseOverview from "../../../../components/course/overview";
 import MainLayout from "../../../../components/layout/layout";
 import apiService from "../../../../shared/api/apiServices";
-import { interestSkillsColors } from "../../../../shared/constants/config";
-import { Course } from "../../../../shared/types/course";
-import { BaseType, StudentProfile } from "../../../../shared/types/student";
+import {
+  CourseStatusBadge,
+  CourseStatusColor,
+  CourseStatusText,
+} from "../../../../shared/constants/course";
+import { CourseDetail, Schedule } from "../../../../shared/types/course";
 
-const TitleWrapper = styled.h3`
-  color: #7356f1;
-  margin: 20px 0px;
-  font-size: 24px;
+const RowWrapper = styled(Row)`
+  width: calc(100% + 48px);
+  margin: 0 0 0 -24px !important;
 `;
-const { TabPane } = Tabs;
+
+const ColWrapper = styled(Col)`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  position: relative;
+  border: 1px solid #f0f0f0;
+  border-left: none;
+  border-bottom: none;
+  :last-child {
+    border-right: none;
+  }
+  p {
+    margin-bottom: 0;
+  }
+  b {
+    color: #7356f1;
+    font-size: 24px;
+  }
+`;
+
+const Title = styled.h2`
+  color: #7356f1;
+`;
+
+const SubTitle = styled.h3`
+  margin: 1em 0;
+`;
+
+const StepsRow = styled(Row)`
+  overflow-x: scroll;
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  .ant-steps-item-title {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: 6em;
+  }
+`;
 
 export async function getServerSideProps(context) {
   const { id } = context.params;
@@ -25,145 +70,141 @@ export async function getServerSideProps(context) {
 }
 
 export default function Page(props: { id: number }) {
-  const router = useRouter();
-  const [student, setStudent] = useState<StudentProfile>(null);
+  const [courseData, setCourseData] = useState<CourseDetail>();
+  const [activeChapterIndex, setActiveChapterIndex] = useState<number>(0);
   const [info, setInfo] = useState<{ label: string; value: string | number }[]>(
     []
   );
-  const [about, setAbout] = useState<
-    { label: string; value: string | number }[]
-  >([]);
+  const router = useRouter();
 
-  const columns: ColumnType<Course>[] = [
-    {
-      title: "No.",
-      key: "index",
-      render: (_1, _2, index) => index + 1,
-    },
-    {
-      title: "Name",
-      dataIndex: "name",
-    },
-    {
-      title: "Type",
-      dataIndex: "type",
-      render: (type: BaseType[]) => type.map((item) => item.name).join(","),
-    },
-    {
-      title: "Join Time",
-      dataIndex: "createdAt",
-    },
-  ];
+  const getChapterExtra = (source: Schedule, index: number) => {
+    const activeIndex = source.chapters.findIndex(
+      (item) => item.id === source.current
+    );
+    const status = index === activeIndex ? 1 : index < activeIndex ? 0 : 2;
+
+    return (
+      <Tag color={CourseStatusColor[status]}>{CourseStatusText[status]}</Tag>
+    );
+  };
 
   useEffect(() => {
-    const param = +router.query.id || props.id;
     (async () => {
-      try {
-        const { data } = await apiService.getStudentById(param);
-        if (!!data) {
-          const info = [
-            { label: "Name", value: data.name },
-            { label: "Age", value: data.age },
-            { label: "Email", value: data.email },
-            { label: "Phone", value: data.phone },
-          ];
-          const about = [
-            { label: "Eduction", value: data.education },
-            { label: "Area", value: data.country },
-            { label: "Gender", value: data.gender === 1 ? "Male" : "Female" },
-            {
-              label: "Member Period",
-              value: data.memberStartAt + " - " + data.memberEndAt,
-            },
-            { label: "Type", value: data.type.name },
-            { label: "Create Time", value: data.ctime },
-            { label: "Update Time", value: data.updateAt },
-          ];
-          setStudent(data);
-          setInfo(info);
-          setAbout(about);
-        }
-      } catch (err) {
-        message.error("Something Wrong!!!", 10);
+      const id = +router.query.id || props.id;
+      const { data } = await apiService.getCourseById(id);
+
+      if (data) {
+        setCourseData(data);
+        const sales = data.sales;
+        const itemInfo = [
+          { label: "Price", value: sales.price },
+          { label: "Batches", value: sales.batches },
+          { label: "Students", value: sales.studentAmount },
+          { label: "Earings", value: sales.earnings },
+        ];
+        setInfo(itemInfo);
+        setActiveChapterIndex(
+          data.schedule.chapters.findIndex(
+            (item) => item.id === data.schedule.current
+          )
+        );
       }
     })();
-  }, [router.query.id, props.id]);
+  }, [props.id, router.query.id]);
 
   return (
     <MainLayout>
       <Row gutter={[6, 16]}>
         <Col span={8}>
-          <Card
-            title={
-              <Avatar
-                size={{ xs: 40, sm: 60, md: 80, lg: 100, xl: 120, xxl: 150 }}
-                src={student?.avatar}
-              />
-            }
-            style={{ textAlign: "center" }}
+          <CourseOverview
+            {...courseData}
+            cardProps={{ bodyStyle: { paddingBottom: 0 } }}
           >
-            <Row gutter={[6, 16]}>
-              {info.map((item) => (
-                <Col key={item.label} span={12}>
-                  <b>{item.label}</b>
-                  <div>{item.value}</div>
-                </Col>
+            <RowWrapper gutter={[6, 16]} justify="space-between" align="middle">
+              {info.map((item, index) => (
+                <ColWrapper key={index} span={6}>
+                  <b>{item.value}</b>
+                  <p>{item.label}</p>
+                </ColWrapper>
               ))}
-              <Col span={24}>
-                <b>Address</b>
-                <div>{student?.address}</div>
-              </Col>
-            </Row>
-          </Card>
+            </RowWrapper>
+          </CourseOverview>
         </Col>
         <Col offset={1} span={15}>
           <Card>
-            <Tabs defaultActiveKey="1">
-              <TabPane tab="About" key="1">
-                <TitleWrapper>Information</TitleWrapper>
-                <Row gutter={[6, 16]}>
-                  {about.map((item) => (
-                    <Col key={item.label} span={24}>
-                      <Row gutter={[6, 16]}>
-                        <Col span={7}>
-                          <b> {item.label}</b>
-                        </Col>
-                        <Col>{item.value}</Col>
-                      </Row>
-                    </Col>
-                  ))}
-                </Row>
+            <Title>Course Detail</Title>
 
-                <TitleWrapper>Information</TitleWrapper>
+            <SubTitle>Create Time</SubTitle>
+            <Row>{courseData?.ctime}</Row>
 
-                <Row gutter={[6, 16]}>
-                  <Col>
-                    {student?.interest.map((item, index) => (
-                      <Tag
-                        color={interestSkillsColors[index]}
-                        key={item}
-                        style={{ padding: "5px 10px" }}
-                      >
-                        {item}
-                      </Tag>
-                    ))}
-                  </Col>
-                </Row>
-                <TitleWrapper>Description</TitleWrapper>
+            <SubTitle>Start Time</SubTitle>
+            <Row>{courseData?.startTime}</Row>
 
-                <Row gutter={[6, 16]}>
-                  <Col style={{ lineHeight: 2 }}>{student?.description}</Col>
-                </Row>
-              </TabPane>
+            <Badge
+              status={CourseStatusBadge[courseData?.status] as any}
+              offset={[5, 24]}
+            >
+              <SubTitle>Status</SubTitle>
+            </Badge>
+            <StepsRow>
+              <Steps
+                size="small"
+                current={activeChapterIndex}
+                style={{ width: "auto" }}
+              >
+                {courseData?.schedule?.chapters.map((item) => (
+                  <Steps.Step title={item.name} key={item.id} />
+                ))}
+              </Steps>
+            </StepsRow>
 
-              <TabPane tab="Courses" key="2">
-                <Table
-                  dataSource={student?.courses}
-                  columns={columns}
-                  rowKey="id"
-                />
-              </TabPane>
-            </Tabs>
+            <SubTitle>Course Code</SubTitle>
+            <Row>{courseData?.uid}</Row>
+
+            <SubTitle>Class Time</SubTitle>
+            <ClassTime data={courseData?.schedule?.classTime} />
+
+            <SubTitle>Category</SubTitle>
+            <Row>
+              {courseData?.type?.map((item, index) => (
+                <Tag
+                  key={index}
+                  color="geekblue"
+                  style={{ padding: "5px 10px" }}
+                >
+                  {item.name}
+                </Tag>
+              ))}
+            </Row>
+
+            <SubTitle>Description</SubTitle>
+            {courseData?.detail !== "no" ? (
+              <Row>{courseData?.detail}</Row>
+            ) : (
+              <Row>
+                An open source programming language created by Google. As one of
+                the fastest growing languages in terms of popularity, its a
+                great time to pick up the basics of it
+              </Row>
+            )}
+
+            <SubTitle>Chapter</SubTitle>
+            {courseData?.schedule && (
+              <Collapse
+                bordered={false}
+                defaultActiveKey={courseData.schedule.current}
+              >
+                {courseData.schedule.chapters.map((item, index) => (
+                  <Collapse.Panel
+                    header={item.name}
+                    key={item.id}
+                    extra={getChapterExtra(courseData.schedule, index)}
+                  >
+                    {item.content}
+                  </Collapse.Panel>
+                ))}
+              </Collapse>
+            )}
           </Card>
         </Col>
       </Row>

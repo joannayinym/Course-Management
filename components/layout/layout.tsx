@@ -1,4 +1,4 @@
-import { Button, Layout, Menu, message, Tooltip } from "antd";
+import { Button, Layout, message, Tooltip } from "antd";
 import {
   MenuUnfoldOutlined,
   MenuFoldOutlined,
@@ -61,14 +61,14 @@ export default function MainLayout(props: React.PropsWithChildren<any>) {
   };
 
   return (
-    <Layout>
+    <Layout style={{ height: "100vh" }}>
       <Sider trigger={null} collapsible collapsed={collapsed}>
         <Link href="/" passHref>
           <Title>CMS</Title>
         </Link>
         <MenuGenerator userRole={userRole} />
       </Sider>
-      <Layout>
+      <Layout id="contentLayout" style={{ overflow: "scroll" }}>
         <Header
           style={{
             paddingLeft: 20,
@@ -95,12 +95,12 @@ export default function MainLayout(props: React.PropsWithChildren<any>) {
             </Tooltip>
           ) : null}
         </Header>
-        <AppBreadCrumb />
+        <AppBreadCrumb userRole={userRole} />
         <Content
           style={{
             margin: "24px 16px",
             padding: 16,
-            minHeight: 1000,
+            minHeight: "auto",
             backgroundColor: "#fff",
           }}
         >

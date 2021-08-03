@@ -1,10 +1,21 @@
+import { message } from "antd";
 import { AxiosError } from "axios";
 import axiosInstance from "../axiosInstance";
+import { RootPath, SubPath } from "../constants/apiPath";
+import {
+  AddCourseRequest,
+  AddCourseResponse,
+  Course,
+  CourseDetail,
+  CourseRequest,
+  CourseResponse,
+  UpdateCourseRequest,
+  UpdateCourseResponse,
+} from "../types/course";
 import { Country } from "../types/others";
 import {
   AddStudentRequest,
   AddStudentResponse,
-  Student,
   StudentProfile,
   StudentsRequest,
   StudentsResponse,
@@ -14,11 +25,40 @@ import {
 import { IResponse, QueryParams } from "../types/type";
 import { LoginRequest, LoginResponse } from "../types/user";
 
-class ApiService {
-  private errorHandler(error: AxiosError<IResponse>): IResponse {
-    const msg = error.response?.data.msg || "";
-    const code = error.response?.status || 0;
-    return { msg, code };
+type IPath = (string | number)[] | string | number;
+
+class BaseApiService {
+  protected async get<T>(path: IPath, params?: QueryParams): Promise<T> {
+    let currentPath = this.getPath(path);
+    currentPath = !!params
+      ? `${currentPath}?${this.paramsSerializer(params)}`
+      : currentPath;
+
+    return axiosInstance
+      .get(currentPath)
+      .then((res) => res.data)
+      .catch((err) => this.errorHandler(err));
+  }
+
+  protected async post<T>(path: IPath, params: object): Promise<T> {
+    return axiosInstance
+      .post(this.getPath(path), params)
+      .then((res) => res.data)
+      .catch(this.errorHandler);
+  }
+
+  protected async delete<T>(path: IPath): Promise<T> {
+    return axiosInstance
+      .delete(this.getPath(path))
+      .then((res) => res.data)
+      .catch(this.errorHandler);
+  }
+
+  protected async put<T>(path: IPath, params: object): Promise<T> {
+    return axiosInstance
+      .put(this.getPath(path), params)
+      .then((res) => res.data)
+      .catch(this.errorHandler);
   }
 
   private paramsSerializer(params: QueryParams) {
@@ -27,64 +67,134 @@ class ApiService {
       .join("&");
   }
 
-  login(req: LoginRequest): Promise<IResponse<LoginResponse>> {
-    return axiosInstance
-      .post<IResponse<LoginResponse>>("/login", req)
-      .then((res) => res.data)
-      .catch(this.errorHandler);
+  private getPath(path: IPath): string {
+    return !Array.isArray(path) ? String(path) : path.join("/");
   }
 
-  logout(): Promise<IResponse<boolean>> {
-    return axiosInstance
-      .post<IResponse<boolean>>("/logout")
-      .then((res) => res.data)
-      .catch(this.errorHandler);
+  protected isError(code: number): boolean {
+    return !(
+      code.toString().startsWith("2") || code.toString().startsWith("3")
+    );
   }
 
-  getStudents(req: StudentsRequest): Promise<IResponse<StudentsResponse>> {
-    return axiosInstance
-      .get<IResponse<StudentsResponse>>(
-        `/students?${this.paramsSerializer(req as unknown as QueryParams)}`
-      )
-      .then((res) => res.data)
-      .catch(this.errorHandler);
+  protected showMessage =
+    (isSuccessDisplay = false) =>
+    (res: IResponse): IResponse => {
+      const { code, msg } = res;
+      const isError = this.isError(code);
+
+      if (isError) {
+        message.error(msg);
+      }
+
+      if (isSuccessDisplay && !isError) {
+        message.success(msg);
+      }
+
+      return res;
+    };
+
+  private errorHandler(error: AxiosError<IResponse>): IResponse {
+    const msg = error.response?.data.msg || "";
+    const code = error.response?.status || 0;
+    return { msg, code };
+  }
+}
+class ApiService extends BaseApiService {
+  async login(req: LoginRequest): Promise<IResponse<LoginResponse>> {
+    return this.post<IResponse<LoginResponse>>(RootPath.login, req).then(
+      this.showMessage()
+    );
   }
 
-  getStudentById(id: number): Promise<IResponse<StudentProfile>> {
-    return axiosInstance
-      .get<IResponse<StudentProfile>>(`/students/${id}`)
-      .then((res) => res.data)
-      .catch(this.errorHandler);
+  async logout(): Promise<IResponse<boolean>> {
+    return this.post<IResponse<boolean>>(RootPath.logout, {}).then(
+      this.showMessage()
+    );
   }
 
-  getCountries(): Promise<IResponse<Country[]>> {
-    return axiosInstance
-      .get<IResponse<Country[]>>("/countries")
-      .then((res) => res.data)
-      .catch(this.errorHandler);
+  async getCountries(): Promise<IResponse<Country[]>> {
+    return this.get<IResponse<Country[]>>(RootPath.countries).then(
+      this.showMessage()
+    );
   }
 
-  addStudent(req: AddStudentRequest): Promise<IResponse<AddStudentResponse>> {
-    return axiosInstance
-      .post<IResponse<AddStudentResponse>>("/students", req)
-      .then((res) => res.data)
-      .catch(this.errorHandler);
+  async getStudents(
+    req: StudentsRequest
+  ): Promise<IResponse<StudentsResponse>> {
+    return this.get<IResponse<StudentsResponse>>(
+      RootPath.students,
+      req as unknown as QueryParams
+    );
   }
 
-  updateStudent(
+  async getStudentById(id: number): Promise<IResponse<StudentProfile>> {
+    return this.get<IResponse<StudentProfile>>([RootPath.students, id]).then(
+      this.showMessage()
+    );
+  }
+
+  async addStudent(
+    req: AddStudentRequest
+  ): Promise<IResponse<AddStudentResponse>> {
+    return this.post<IResponse<AddStudentResponse>>(
+      RootPath.students,
+      req
+    ).then(this.showMessage(true));
+  }
+
+  async updateStudent(
     req: UpdateStudentRequest
   ): Promise<IResponse<UpdateStudentResponse>> {
-    return axiosInstance
-      .put<IResponse<UpdateStudentResponse>>("/students", req)
-      .then((res) => res.data)
-      .catch(this.errorHandler);
+    return this.put<IResponse<UpdateStudentResponse>>(
+      RootPath.students,
+      req
+    ).then(this.showMessage(true));
   }
 
-  deleteStudent(id: number): Promise<IResponse<boolean>> {
-    return axiosInstance
-      .delete<IResponse<boolean>>(`/students/${id}`)
-      .then((res) => res.data)
-      .catch(this.errorHandler);
+  async deleteStudent(id: number): Promise<IResponse<boolean>> {
+    return this.delete<IResponse<boolean>>([RootPath.students, id]).then(
+      this.showMessage(true)
+    );
+  }
+
+  async getCourses(req: CourseRequest): Promise<IResponse<CourseResponse>> {
+    return this.get<IResponse<CourseResponse>>(
+      RootPath.courses,
+      req as unknown as QueryParams
+    ).then(this.showMessage());
+  }
+
+  async getCourseById(id: number): Promise<IResponse<CourseDetail>> {
+    return this.get<IResponse<CourseDetail>>(
+      [RootPath.courses, SubPath.detail],
+      {
+        id,
+      }
+    ).then(this.showMessage());
+  }
+
+  async addCourse(
+    req: AddCourseRequest
+  ): Promise<IResponse<AddCourseResponse>> {
+    return this.post<IResponse<AddCourseResponse>>(RootPath.courses, req).then(
+      this.showMessage()
+    );
+  }
+
+  async updateCourse(
+    req: UpdateCourseRequest
+  ): Promise<IResponse<UpdateCourseResponse>> {
+    return this.put<IResponse<UpdateCourseResponse>>(
+      RootPath.courses,
+      req
+    ).then(this.showMessage());
+  }
+
+  async deleteCourse(id: number): Promise<IResponse<boolean>> {
+    return this.delete<IResponse<boolean>>([RootPath.courses, id]).then(
+      this.showMessage()
+    );
   }
 }
 

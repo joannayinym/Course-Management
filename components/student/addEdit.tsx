@@ -60,7 +60,7 @@ export default function AddEditStudent(props: AddEditStudentProps) {
           name: student?.name,
           email: student?.email,
           country: student?.country,
-          typeId: student?.type?.id,
+          type: student?.type?.id,
         }}
       >
         <Form.Item name="name" label="Name" rules={[{ required: true }]}>
@@ -89,7 +89,7 @@ export default function AddEditStudent(props: AddEditStudentProps) {
         </Form.Item>
 
         <Form.Item
-          name="typeId"
+          name="type"
           label="Student Type"
           rules={[{ required: true }]}
         >

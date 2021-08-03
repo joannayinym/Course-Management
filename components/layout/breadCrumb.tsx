@@ -7,8 +7,13 @@ import {
   getSideNavNameByPath,
 } from "../../shared/utils/sideNav";
 import { sidebar, SideNav } from "./sidebar";
+import { Role } from "../../shared/types/user";
 
-export default function AppBreadCrumb(userRole: string) {
+export default function AppBreadCrumb({
+  userRole,
+}: {
+  userRole: Role | undefined;
+}) {
   const router = useRouter();
   const path = router.pathname;
   const paths = path.split("/").slice(1);
@@ -28,7 +33,7 @@ export default function AppBreadCrumb(userRole: string) {
         }
 
         const record = deepSearchRecordFactory(
-          (nav: SideNav, value: any) => nav.label === value
+          (nav: SideNav, value: string) => nav.label === value
         )(sidebar[role], name);
 
         const isText =

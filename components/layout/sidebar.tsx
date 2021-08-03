@@ -23,8 +23,22 @@ export interface SideNav {
   hide?: boolean;
 }
 
+export enum RoutePath {
+  manager = "manager",
+  teachers = "teachers",
+  students = "students",
+  selectStudents = "selectStudents",
+  courses = "courses",
+  addCourse = "add-course",
+  editCourse = "edit-course",
+  own = "own",
+  schedule = "schedule",
+  profile = "profile",
+  message = "message",
+}
+
 const students: SideNav = {
-  path: "students",
+  path: RoutePath.students,
   label: "Student",
   hide: true,
   icon: <SolutionOutlined />,
@@ -32,7 +46,7 @@ const students: SideNav = {
 };
 
 const courses: SideNav = {
-  path: "courses",
+  path: RoutePath.courses,
   label: "Course",
   hide: true,
   icon: <ReadOutlined />,
@@ -44,7 +58,7 @@ const courses: SideNav = {
 };
 
 const teachers: SideNav = {
-  path: "teachers",
+  path: RoutePath.teachers,
   label: "Teacher",
   hide: true,
   icon: <DeploymentUnitOutlined />,
@@ -64,7 +78,7 @@ const overview: SideNav = {
 };
 
 const messages: SideNav = {
-  path: "message",
+  path: RoutePath.message,
   label: "Message",
   icon: <MessageOutlined />,
 };

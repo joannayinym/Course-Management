@@ -4,10 +4,15 @@ export interface IResponse<T = any> {
   data?: T;
 }
 
+export type RequestOmitPaginator<T> = Omit<T, "page" | "limit">;
 export interface Paginator {
   page: number;
   limit: number;
-  total?: number;
+}
+
+export interface ListResponse {
+  total: number;
+  paginator?: Paginator;
 }
 
 export interface QueryParams {

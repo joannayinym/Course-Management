@@ -12,12 +12,13 @@ import {
   Student,
   StudentCourse,
   StudentsRequest,
+  StudentsResponse,
 } from "../../shared/types/student";
-import { Paginator } from "../../shared/types/type";
 import Input from "antd/lib/input";
 import AddEditStudent from "./addEdit";
 import Link from "next/link";
 import { Country } from "../../shared/types/others";
+import { useListEffect } from "../../shared/utils/listHook";
 
 const TableHeaderWrapper = styled.div`
   display: flex;
@@ -33,9 +34,6 @@ const Search = styled(Input.Search)`
 
 export default function StudentTable() {
   const [query, setQuery] = useState<string>("");
-  const [paginator, setPaginator] = useState<Paginator>({ limit: 20, page: 1 });
-  const [currentData, setCurrentData] = useState<Student[]>([]);
-  const [total, setTotal] = useState<number>(0);
   const [showModal, setShowModal] = useState<boolean>(false);
   const [actionType, setActionType] = useState<string>("Add");
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
@@ -44,6 +42,13 @@ export default function StudentTable() {
     (event: ChangeEvent<HTMLInputElement>) => setQuery(event.target.value),
     1000
   );
+  const { paginator, setPaginator, data, setData, total, setTotal } =
+    useListEffect<StudentsRequest, StudentsResponse, Student>(
+      apiService.getStudents.bind(apiService),
+      "students",
+      true,
+      { query }
+    );
   const columns: ColumnType<Student>[] = [
     {
       title: "No.",
@@ -122,10 +127,10 @@ export default function StudentTable() {
                     record.id
                   );
                   if (isDeleted) {
-                    const updatedData = currentData.filter(
+                    const updatedData = data.filter(
                       (item) => item.id !== record.id
                     );
-                    setCurrentData(updatedData);
+                    setData(updatedData);
                     setTotal(total - 1);
                   }
                 } catch (Error) {
@@ -152,19 +157,16 @@ export default function StudentTable() {
     onChange: (page: number, pageSize?: number | undefined) => {
       setPaginator({ page, limit: pageSize || 20 });
     },
-    onShowSizeChange: (page: number, pageSize?: number | undefined) => {
-      setPaginator({ page: 1, limit: pageSize || 20 });
-    },
   };
 
   const onAddOrEdit = (student: Student) => {
     if (actionType === "Add") {
-      setCurrentData([student, ...currentData]);
+      setData([student, ...data]);
     } else {
-      const index = currentData.findIndex((item) => item.id === student.id);
+      const index = data.findIndex((item) => item.id === student.id);
 
-      currentData[index] = student;
-      setCurrentData([...currentData]);
+      data[index] = student;
+      setData([...data]);
     }
     setShowModal(false);
     setSelectedStudent(null);
@@ -173,21 +175,6 @@ export default function StudentTable() {
     setShowModal(false);
     setSelectedStudent(null);
   };
-
-  useEffect(() => {
-    (async () => {
-      const params: StudentsRequest = query
-        ? { ...paginator, query }
-        : paginator;
-      try {
-        const { data } = await apiService.getStudents(params);
-        setCurrentData(data?.students || []);
-        setTotal(data?.total || 0);
-      } catch (err) {
-        message.error("Something Wrong!!!", 10);
-      }
-    })();
-  }, [paginator, query]);
 
   useEffect(() => {
     (async () => {
@@ -223,9 +210,10 @@ export default function StudentTable() {
       </TableHeaderWrapper>
       <Table
         columns={columns}
-        dataSource={currentData}
+        dataSource={data}
         rowKey={"id"}
         pagination={paginationProps}
+        loading={!data || data.length === 0}
       />
       <Modal
         title={`${actionType} Student`}
