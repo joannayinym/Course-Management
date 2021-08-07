@@ -5,12 +5,15 @@ import { RootPath, SubPath } from "../constants/apiPath";
 import {
   AddCourseRequest,
   AddCourseResponse,
-  Course,
+  CourseCode,
   CourseDetail,
   CourseRequest,
   CourseResponse,
+  CourseType,
+  CourseTypeResponse,
   UpdateCourseRequest,
   UpdateCourseResponse,
+  UpdateScheduleRequest,
 } from "../types/course";
 import { Country } from "../types/others";
 import {
@@ -22,6 +25,7 @@ import {
   UpdateStudentRequest,
   UpdateStudentResponse,
 } from "../types/student";
+import { Teacher, TeacherRequest, TeacherResponse } from "../types/teacher";
 import { IResponse, QueryParams } from "../types/type";
 import { LoginRequest, LoginResponse } from "../types/user";
 
@@ -195,6 +199,42 @@ class ApiService extends BaseApiService {
     return this.delete<IResponse<boolean>>([RootPath.courses, id]).then(
       this.showMessage()
     );
+  }
+
+  async getTeachers(req: TeacherRequest): Promise<IResponse<TeacherResponse>> {
+    return this.get<IResponse<TeacherResponse>>(
+      RootPath.teachers,
+      req as unknown as QueryParams
+    ).then(this.showMessage());
+  }
+
+  async getTeacherById(id: number): Promise<IResponse<Teacher>> {
+    return this.get<IResponse<Teacher>>(RootPath.teachers, {
+      id,
+    }).then(this.showMessage());
+  }
+
+  async getCourseCode(): Promise<IResponse<CourseCode>> {
+    return this.get<IResponse<CourseCode>>([
+      RootPath.courses,
+      SubPath.code,
+    ]).then(this.showMessage());
+  }
+
+  async getCourseTypes(): Promise<IResponse<CourseType[]>> {
+    return this.get<IResponse<CourseType[]>>([
+      RootPath.courses,
+      SubPath.type,
+    ]).then(this.showMessage());
+  }
+
+  async updateSchedule(
+    req: UpdateScheduleRequest
+  ): Promise<IResponse<boolean>> {
+    return this.put<IResponse<boolean>>(
+      [RootPath.courses, SubPath.schedule],
+      req
+    ).then(this.showMessage());
   }
 }
 

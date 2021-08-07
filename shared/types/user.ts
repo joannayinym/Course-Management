@@ -5,8 +5,12 @@ export interface LoginRequest {
   remember: boolean;
 }
 
-export type Role = "student" | "teacher" | "manager";
-
+// export type Role = "student" | "teacher" | "manager";
+export enum Role {
+  student = "student",
+  teacher = "teacher",
+  manager = "manager",
+}
 export interface LoginResponse {
   token: string;
   role: Role;

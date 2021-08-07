@@ -88,3 +88,18 @@ export interface UpdateCourseRequest {
 }
 
 export type UpdateCourseResponse = Course;
+
+export interface CourseType {
+  id: number;
+  name: string;
+}
+
+export type CourseCode = string;
+export interface UpdateScheduleRequest {
+  scheduleId: number;
+  courseId: number;
+  chapters: Omit<Chapter, "id">[];
+  classTime: string[];
+}
+
+export type UpdateScheduleResponse = Course;
