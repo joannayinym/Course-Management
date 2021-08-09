@@ -28,7 +28,7 @@ import storage from "../../shared/storage";
 import { Role } from "../../shared/types/user";
 import { Paginator } from "../../shared/types/type";
 import styled from "styled-components";
-import { DurationUnit } from "../../shared/constants/duration";
+import { gutter } from "../../shared/constants/config";
 
 const DescriptionWrapper = styled(Form.Item)`
   .ant-form-item-control {
@@ -83,31 +83,37 @@ const ImageUploadWrapper = styled(Form.Item)`
 const { Option } = Select;
 
 export default function AddCourse({
+  course,
   onSuccess,
 }: {
-  onSuccess: (course: Course) => void;
+  course?: Course;
+  onSuccess?: (course: Course) => void;
 }) {
   const [form] = useForm();
+  const [isAdd, setIsAdd] = useState(course === undefined);
   const [teachers, setTeachers] = useState<Teacher[]>([]);
-  //   const [searchTeacher, setSearchTeacher] = useState<boolean>(false);
   const [courseType, setCourseType] = useState<CourseType[]>([]);
   const [fileList, setFileList] = useState<UploadFile<any>[]>([]);
   const [paginator, setPaginator] = useState<Paginator>({ limit: 50, page: 1 });
-  const [durationNumber, setDurationNumber] = useState<number>(0);
-  const [unit, setUnit] = useState<DurationUnit>(1);
   const role = storage.role;
 
   const onFinish = async (values: AddCourseRequest) => {
-    const course: AddCourseRequest = {
+    const params: AddCourseRequest = {
       ...values,
-      duration: durationNumber,
-      durationUnit: unit,
+      duration: +values.duration,
       startTime:
         values.startTime && moment(values.startTime).format("YYYY-MM-DD"),
     };
-    const response = await apiService.addCourse(course);
-    const { data } = response;
 
+    const response = isAdd
+      ? apiService.addCourse(params)
+      : apiService.updateCourse({ ...params, id: course.id });
+
+    const { data } = await response;
+
+    if (!!data && !course) {
+      setIsAdd(false);
+    }
     if (!!data && !!onSuccess) {
       onSuccess(data);
     }
@@ -138,11 +144,13 @@ export default function AddCourse({
   };
 
   useEffect(() => {
-    apiService.getCourseCode().then((res) => {
-      const { data: uid } = res;
+    if (isAdd) {
+      apiService.getCourseCode().then((res) => {
+        const { data: uid } = res;
 
-      form.setFieldsValue({ uid });
-    });
+        form.setFieldsValue({ uid });
+      });
+    }
 
     if (role === Role.teacher) {
       apiService.getTeacherById(storage.userId).then((res) => {
@@ -172,6 +180,26 @@ export default function AddCourse({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    if (!!course) {
+      const values = {
+        ...course,
+        type: course.type.map((item) => item.id),
+        teacherId: course.teacherName,
+        startTime: moment(course.startTime),
+        duration: course.duration,
+        durationUnit: course.durationUnit,
+      };
+
+      form.setFieldsValue(values);
+
+      setFileList([
+        { name: "Cover Image", url: course.cover, uid: course.uid },
+      ]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [course]);
+
   return (
     <Form
       labelCol={{ offset: 1 }}
@@ -180,8 +208,8 @@ export default function AddCourse({
       layout="vertical"
       onFinish={onFinish}
     >
-      <Row gutter={[6, 16]}>
-        <Col span={6}>
+      <Row gutter={gutter}>
+        <Col span={8}>
           <Form.Item
             label="Course Name"
             name="name"
@@ -199,76 +227,72 @@ export default function AddCourse({
           </Form.Item>
         </Col>
 
-        <Col span={5}>
-          <Form.Item
-            label="Teacher"
-            name="teacherId"
-            rules={[{ required: true, message: "Please select teacher name!" }]}
-          >
-            <Select
-              showSearch
-              placeholder="Select teacher"
-              optionFilterProp="children"
-              filterOption={(input, option) =>
-                option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
-              }
-              //   filterOption={false}
-              //   onSearch={(query: string) => {
-              //     setSearchTeacher(true);
+        <Col span={16}>
+          <Row gutter={gutter}>
+            <Col span={8}>
+              <Form.Item
+                label="Teacher"
+                name="teacherId"
+                rules={[
+                  { required: true, message: "Please select teacher name!" },
+                ]}
+              >
+                <Select
+                  showSearch
+                  placeholder="Select teacher"
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    option.children
+                      .toLowerCase()
+                      .indexOf(input.toLowerCase()) >= 0
+                  }
+                >
+                  {teachers &&
+                    teachers.map((item, index) => (
+                      <Option key={index} value={item.id}>
+                        {item.name}
+                      </Option>
+                    ))}
+                </Select>
+              </Form.Item>
+            </Col>
 
-              //     apiService.getTeachers({ ...paginator, query }).then((res) => {
-              //       const { data } = res;
+            <Col span={8}>
+              <Form.Item
+                label="Type"
+                name="type"
+                rules={[
+                  { required: true, message: "Please input course type!" },
+                ]}
+              >
+                <Select
+                  mode="multiple"
+                  style={{ width: "100%" }}
+                  placeholder="select types"
+                >
+                  {courseType.map((item) => (
+                    <Option key={item.id} value={item.id}>
+                      {item.name}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
 
-              //       if (!!data) {
-              //         setTeachers(data.teachers);
-              //       }
-              //       setSearchTeacher(false);
-              //     });
-              //   }}
-              //   notFoundContent={searchTeacher ? <Spin size="small" /> : null}
-            >
-              {teachers &&
-                teachers.map((item, index) => (
-                  <Option key={index} value={item.id}>
-                    {item.name}
-                  </Option>
-                ))}
-            </Select>
-          </Form.Item>
-        </Col>
-
-        <Col span={7}>
-          <Form.Item
-            label="Type"
-            name="type"
-            rules={[{ required: true, message: "Please input course type!" }]}
-          >
-            <Select
-              mode="multiple"
-              style={{ width: "100%" }}
-              placeholder="select types"
-            >
-              {courseType.map((item) => (
-                <Option key={item.id} value={item.id}>
-                  {item.name}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
-        </Col>
-
-        <Col span={5}>
-          <Form.Item
-            label="Course code"
-            name="uid"
-            rules={[{ required: true }]}
-          >
-            <Input value="" disabled />
-          </Form.Item>
+            <Col span={8}>
+              <Form.Item
+                label="Course code"
+                name="uid"
+                rules={[{ required: true }]}
+              >
+                <Input value="" disabled />
+              </Form.Item>
+            </Col>
+          </Row>
         </Col>
       </Row>
 
-      <Row gutter={[6, 16]}>
+      <Row gutter={gutter}>
         <Col span={8}>
           <Form.Item label="Start Date" name="startTime">
             <DatePicker
@@ -279,39 +303,36 @@ export default function AddCourse({
             />
           </Form.Item>
           <Form.Item label="Price" name="price" rules={[{ required: true }]}>
-            <InputNumber style={{ width: "100%" }} prefix="$" />
+            <InputNumber<number>
+              formatter={(value) =>
+                `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+              }
+              parser={(value) => +value.replace(/\$\s?|(,*)/g, "")}
+              min={0}
+              style={{ width: "100%" }}
+            />
           </Form.Item>
           <Form.Item
-            label="Student"
+            label="Student Limit"
             name="maxStudents"
             rules={[{ required: true }]}
           >
-            <InputNumber style={{ width: "100%" }} />
+            <InputNumber min={1} max={10} style={{ width: "100%" }} />
           </Form.Item>
-          <Form.Item
-            label="Duration"
-            name="duration"
-            // rules={[{ required: true }]}
-          >
+          <Form.Item label="Duration">
             <Input.Group compact>
-              <InputNumber
-                value={durationNumber}
-                onChange={(value: number) => setDurationNumber(value)}
-                style={{ width: "80%" }}
-              />
-
-              <Select
-                defaultValue={1}
-                value={unit}
-                onChange={(value: number) => setUnit(value)}
-                style={{ width: "20%" }}
-              >
-                {DurationUnitType.map((item) => (
-                  <Option key={item.id} value={item.id}>
-                    {item.name}
-                  </Option>
-                ))}
-              </Select>
+              <Form.Item noStyle name={"duration"} rules={[{ required: true }]}>
+                <InputNumber min={0} style={{ width: "80%" }} />
+              </Form.Item>
+              <Form.Item noStyle name={"durationUnit"}>
+                <Select defaultValue={1} style={{ width: "20%" }}>
+                  {DurationUnitType.map((item) => (
+                    <Option key={item.id} value={item.id}>
+                      {item.name}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
             </Input.Group>
           </Form.Item>
         </Col>
@@ -358,12 +379,14 @@ export default function AddCourse({
         </Col>
       </Row>
 
-      <Row gutter={[16, 6]}>
-        <Form.Item wrapperCol={{ span: 16 }}>
-          <Button type="primary" htmlType="submit">
-            Create Course
-          </Button>
-        </Form.Item>
+      <Row gutter={gutter}>
+        <Col span={8}>
+          <Form.Item>
+            <Button type="primary" htmlType="submit">
+              {isAdd ? "Create Course" : "Update Course"}
+            </Button>
+          </Form.Item>
+        </Col>
       </Row>
     </Form>
   );

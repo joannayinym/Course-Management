@@ -36,7 +36,6 @@ export default function BackTop() {
     };
   }, []);
 
-  console.warn("visible = ", visible);
   return visible ? (
     <ToTop
       onClick={() => {

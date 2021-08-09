@@ -10,7 +10,7 @@ import {
   CourseRequest,
   CourseResponse,
   CourseType,
-  CourseTypeResponse,
+  Schedule,
   UpdateCourseRequest,
   UpdateCourseResponse,
   UpdateScheduleRequest,
@@ -162,7 +162,9 @@ class ApiService extends BaseApiService {
     );
   }
 
-  async getCourses(req: CourseRequest): Promise<IResponse<CourseResponse>> {
+  async getCourses(
+    req: Partial<CourseRequest>
+  ): Promise<IResponse<CourseResponse>> {
     return this.get<IResponse<CourseResponse>>(
       RootPath.courses,
       req as unknown as QueryParams
@@ -182,7 +184,7 @@ class ApiService extends BaseApiService {
     req: AddCourseRequest
   ): Promise<IResponse<AddCourseResponse>> {
     return this.post<IResponse<AddCourseResponse>>(RootPath.courses, req).then(
-      this.showMessage()
+      this.showMessage(true)
     );
   }
 
@@ -192,12 +194,12 @@ class ApiService extends BaseApiService {
     return this.put<IResponse<UpdateCourseResponse>>(
       RootPath.courses,
       req
-    ).then(this.showMessage());
+    ).then(this.showMessage(true));
   }
 
   async deleteCourse(id: number): Promise<IResponse<boolean>> {
     return this.delete<IResponse<boolean>>([RootPath.courses, id]).then(
-      this.showMessage()
+      this.showMessage(true)
     );
   }
 
@@ -234,7 +236,20 @@ class ApiService extends BaseApiService {
     return this.put<IResponse<boolean>>(
       [RootPath.courses, SubPath.schedule],
       req
-    ).then(this.showMessage());
+    ).then(this.showMessage(true));
+  }
+
+  async getScheduleById({
+    courseId,
+    scheduleId,
+  }: {
+    courseId?: number;
+    scheduleId?: number;
+  }): Promise<IResponse<Schedule>> {
+    return this.get<IResponse<Teacher>>([RootPath.courses, SubPath.schedule], {
+      courseId,
+      scheduleId,
+    }).then(this.showMessage());
   }
 }
 

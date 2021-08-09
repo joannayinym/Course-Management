@@ -5,7 +5,7 @@ import AddCourse from "../../../../components/course/addCourse";
 import styled from "styled-components";
 import { Course } from "../../../../shared/types/course";
 import CourseSchedule from "../../../../components/course/schedule";
-import router from "next/router";
+import router, { useRouter } from "next/router";
 import storage from "../../../../shared/storage";
 
 const ContentWrapper = styled.div`
@@ -13,50 +13,61 @@ const ContentWrapper = styled.div`
 `;
 
 const { Step } = Steps;
-const steps = [
-  {
-    title: "Course Detail",
-    content: "First-content",
-  },
-  {
-    title: "Course Schedule",
-    content: "Second-content",
-  },
-  {
-    title: "Success",
-    content: "Last-content",
-  },
-];
 
 export default function Page() {
-  const [current, setCurrent] = useState(0);
+  const [currentStep, setCurrentStep] = useState<number>(0);
+  const [maxStep, setMaxStep] = useState<number>(1);
   const [courseId, setCourseId] = useState(null);
   const [scheduleId, setScheduleId] = useState(null);
   const [success, setSuccess] = useState(false);
+  const router = useRouter();
+  const userRole = storage.role;
+  const onStepChange = (current: number) => {
+    if (maxStep >= current) {
+      setCurrentStep(current);
+    }
+  };
+  const moveToNext = () => {
+    if (maxStep < currentStep + 1) {
+      setMaxStep(currentStep + 1);
+    }
+    setCurrentStep(currentStep + 1);
+  };
+  const steps = [
+    {
+      title: "Course Detail",
+    },
+    {
+      title: "Course Schedule",
+    },
+    {
+      title: "Success",
+    },
+  ];
 
   return (
     <MainLayout>
-      <Steps current={current}>
+      <Steps type="navigation" current={currentStep} onChange={onStepChange}>
         {steps.map((item) => (
           <Step key={item.title} title={item.title} />
         ))}
       </Steps>
       <ContentWrapper>
-        {current === 0 ? (
+        {currentStep === 0 ? (
           <AddCourse
             onSuccess={(course: Course) => {
               setCourseId(course.id);
               setScheduleId(course.scheduleId);
-              setCurrent(current + 1);
+              moveToNext();
             }}
           />
-        ) : current === 1 ? (
+        ) : currentStep === 1 ? (
           <CourseSchedule
             courseId={courseId}
             scheduleId={scheduleId}
             onSuccess={(res: boolean) => {
               setSuccess(true);
-              setCurrent(current + 1);
+              moveToNext();
             }}
           />
         ) : (
