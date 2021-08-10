@@ -24,7 +24,7 @@
    -- 使用 Form.List
    -- 用 selectedWeekdays 存放已选的日期和在 Form.List 中的 field 的 key 值。{value,key}
    -- 如修改则在 render 的时候将开课日期作为 value 值，index 作为 key 值保存到 selectedWeekdays 中。
-   -- Form.List 的 field 的 onSelect 事件中，根据 field.key 值修改 selectedWeekdays 中相同 key 值对应的 value 值
+   -- Form.List 的 field 的 onChange 事件中，根据 field.key 值修改 selectedWeekdays 中相同 key 值对应的 value 值
    -- 删除按钮将 Form.List 的 field 删除的同时删除 selectedWeekdays 中 key 值为 field.key 的项。
 3. 修改章节及开课信息
 4. 给出成功或失败信息
@@ -32,3 +32,4 @@
 ## 问题
 
 updateSchedule 修改时原有章节信息不删除，只追加新的章节。
+重新选择 course 时 chapter 信息保留上一次显示的

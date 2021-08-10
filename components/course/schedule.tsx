@@ -49,22 +49,22 @@ export default function CourseSchedule({
     { fieldKey: number; value: string }[]
   >([]);
 
-  // const setSelectedDays = (name?: (string | number)[]) => {
-  //   const selected: { weekday: string; time: string }[] = form.getFieldValue(
-  //     "classTime" || []
-  //   );
-  //   let result = selected.map((item) => item?.weekday);
+  const setSelectedDays = (name?: (string | number)[]) => {
+    const selected: { weekday: string; time: string }[] = form.getFieldValue(
+      "classTime" || []
+    );
+    let result = selected.map((item) => item?.weekday);
 
-  //   if (name) {
-  //     const value = form.getFieldValue(name);
+    if (name) {
+      const value = form.getFieldValue(name);
 
-  //     result = result.filter((item) => item !== value);
-  //   }
+      result = result.filter((item) => item !== value);
+    }
 
-  //   setSelectedWeekdays([
-  //     ...selectedWeekdays.filter((item) => result.includes(item.value)),
-  //   ]);
-  // };
+    setSelectedWeekdays([
+      ...selectedWeekdays.filter((item) => result.includes(item.value)),
+    ]);
+  };
 
   const onFinish = async (values: ChapterFormValue) => {
     if (!courseId && !scheduleId) {
@@ -105,7 +105,7 @@ export default function CourseSchedule({
       const { data } = await apiService.getScheduleById({ scheduleId });
 
       if (!!data) {
-        const classTimes = data.classTime.map((item) => {
+        const classTimes = data.classTime?.map((item) => {
           const [weekday, time] = item.split(" ");
 
           return {
@@ -114,13 +114,23 @@ export default function CourseSchedule({
           };
         });
 
-        form.setFieldsValue({ chapters: data.chapters, classTime: classTimes });
-        setSelectedWeekdays(
-          classTimes.map((item, index) => ({
-            fieldKey: index,
-            value: item.weekday,
-          }))
-        );
+        if (data.chapters && data.chapters.length > 0) {
+          form.setFieldsValue({
+            chapters: data.chapters,
+          });
+        }
+
+        if (classTimes && classTimes.length > 0) {
+          form.setFieldsValue({
+            classTime: classTimes,
+          });
+          setSelectedWeekdays(
+            classTimes.map((item, index) => ({
+              fieldKey: index,
+              value: item.weekday,
+            }))
+          );
+        }
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -264,11 +274,11 @@ export default function CourseSchedule({
                             <MinusCircleOutlined
                               onClick={() => {
                                 if (fields.length > 1) {
-                                  // setSelectedDays([
-                                  //   "classTime",
-                                  //   field.name,
-                                  //   "weekday",
-                                  // ]);
+                                  setSelectedDays([
+                                    "classTime",
+                                    field.name,
+                                    "weekday",
+                                  ]);
                                   setSelectedWeekdays([
                                     ...selectedWeekdays.filter(
                                       (day) => day.fieldKey !== field.key
@@ -296,7 +306,7 @@ export default function CourseSchedule({
                           size="large"
                           disabled={fields.length >= 7}
                           onClick={() => {
-                            // setSelectedDays();
+                            setSelectedDays();
                             add();
                           }}
                           block
