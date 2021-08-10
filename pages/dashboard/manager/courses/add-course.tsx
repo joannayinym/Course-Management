@@ -5,7 +5,7 @@ import AddCourse from "../../../../components/course/addCourse";
 import styled from "styled-components";
 import { Course } from "../../../../shared/types/course";
 import CourseSchedule from "../../../../components/course/schedule";
-import router, { useRouter } from "next/router";
+import { useRouter } from "next/router";
 import storage from "../../../../shared/storage";
 
 const ContentWrapper = styled.div`
@@ -16,12 +16,12 @@ const { Step } = Steps;
 
 export default function Page() {
   const [currentStep, setCurrentStep] = useState<number>(0);
-  const [maxStep, setMaxStep] = useState<number>(1);
-  const [courseId, setCourseId] = useState(null);
-  const [scheduleId, setScheduleId] = useState(null);
+  const [maxStep, setMaxStep] = useState<number>(0);
+  // const [courseId, setCourseId] = useState(null);
+  // const [scheduleId, setScheduleId] = useState(null);
   const [success, setSuccess] = useState(false);
+  const [course, setCourse] = useState<Course>(undefined);
   const router = useRouter();
-  const userRole = storage.role;
   const onStepChange = (current: number) => {
     if (maxStep >= current) {
       setCurrentStep(current);
@@ -56,15 +56,17 @@ export default function Page() {
         {currentStep === 0 ? (
           <AddCourse
             onSuccess={(course: Course) => {
-              setCourseId(course.id);
-              setScheduleId(course.scheduleId);
+              // setCourseId(course.id);
+              // setScheduleId(course.scheduleId);
+              setCourse(course);
               moveToNext();
             }}
+            course={course}
           />
         ) : currentStep === 1 ? (
           <CourseSchedule
-            courseId={courseId}
-            scheduleId={scheduleId}
+            courseId={course.id}
+            scheduleId={course.scheduleId}
             onSuccess={(res: boolean) => {
               setSuccess(true);
               moveToNext();
@@ -81,7 +83,7 @@ export default function Page() {
                   key="detail"
                   onClick={() =>
                     router.push(
-                      `/dashboard/${storage.role}/courses/${courseId}`
+                      `/dashboard/${storage.role}/courses/${course.id}`
                     )
                   }
                 >

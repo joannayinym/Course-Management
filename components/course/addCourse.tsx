@@ -13,6 +13,7 @@ import {
   DatePicker,
   Upload,
   InputNumber,
+  message,
 } from "antd";
 import { useForm } from "antd/lib/form/Form";
 import moment, { Moment } from "moment";
@@ -95,9 +96,15 @@ export default function AddCourse({
   const [courseType, setCourseType] = useState<CourseType[]>([]);
   const [fileList, setFileList] = useState<UploadFile<any>[]>([]);
   const [paginator, setPaginator] = useState<Paginator>({ limit: 50, page: 1 });
+  const [isUploading, setIsUploading] = useState<boolean>(false);
   const role = storage.role;
 
   const onFinish = async (values: AddCourseRequest) => {
+    if (!isAdd && !course) {
+      message.error("You must select a course to update!");
+      return;
+    }
+
     const params: AddCourseRequest = {
       ...values,
       duration: +values.duration,
@@ -124,11 +131,15 @@ export default function AddCourse({
       const { url } = file.response;
 
       form.setFieldsValue({ cover: url });
+    } else {
+      form.setFieldsValue({ cover: course?.cover || "" });
     }
+
+    setIsUploading(file.status === "uploading");
     setFileList(newFileList);
   };
 
-  const onPreview = async (file) => {
+  const onPreview = async (file: any) => {
     let src = file.url;
     if (!src) {
       src = await new Promise((resolve) => {
@@ -382,7 +393,7 @@ export default function AddCourse({
       <Row gutter={gutter}>
         <Col span={8}>
           <Form.Item>
-            <Button type="primary" htmlType="submit">
+            <Button type="primary" htmlType="submit" disabled={isUploading}>
               {isAdd ? "Create Course" : "Update Course"}
             </Button>
           </Form.Item>
