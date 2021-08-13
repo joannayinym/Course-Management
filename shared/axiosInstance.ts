@@ -3,9 +3,10 @@ import storage from "./storage";
 
 const axiosInstance = axios.create({
   baseURL: "https://cms.chtoma.com/api",
+  // baseURL: "http://localhost:5000/api",
   headers: {
     "Content-Type": "application/json",
-    "Access-Control-Allow-Origin": "*",
+    // "Access-Control-Allow-Origin": "*",
   },
 });
 

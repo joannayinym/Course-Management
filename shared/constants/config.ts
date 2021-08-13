@@ -13,3 +13,11 @@ export const interestSkillsColors: string[] = [
 ];
 
 export const gutter: [Gutter, Gutter] = [6, 16];
+
+export enum SkillLevels {
+  "Know" = 1,
+  "Practiced",
+  "Comprehend",
+  "Expert",
+  "Master",
+}

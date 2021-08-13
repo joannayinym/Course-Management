@@ -3,6 +3,7 @@ import { Button, Col, Form, Input, Radio, RadioChangeEvent, Row } from "antd";
 import styled from "styled-components";
 import { LockOutlined, UserOutlined } from "@ant-design/icons";
 import { useRouter } from "next/router";
+import crypto from "crypto-js";
 import axiosInstance from "../../shared/axiosInstance";
 import Link from "next/link";
 import storage from "../../shared/storage";
@@ -34,9 +35,17 @@ export default function Signup() {
   };
 
   const onFinish = (values: any) => {
+    const encryptedPassword = crypto.AES.encrypt(
+      values.password,
+      "cms"
+    ).toString();
+    console.log("signup password:", values.password);
+    console.log("sign:", encryptedPassword);
+    console.log(crypto.AES.encrypt("111111", "cms management").toString());
+    console.log(crypto.AES.encrypt("111111", "cms management").toString());
     const params: RegisterRequest = {
       email: values.email,
-      password: values.password,
+      password: encryptedPassword,
       role: values.role,
     };
     if (signup(params)) {

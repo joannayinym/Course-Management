@@ -13,7 +13,6 @@ import {
   DatePicker,
   Upload,
   InputNumber,
-  message,
 } from "antd";
 import { useForm } from "antd/lib/form/Form";
 import moment, { Moment } from "moment";
@@ -100,11 +99,6 @@ export default function AddCourse({
   const role = storage.role;
 
   const onFinish = async (values: AddCourseRequest) => {
-    if (!isAdd && !course) {
-      message.error("You must select a course to update!");
-      return;
-    }
-
     const params: AddCourseRequest = {
       ...values,
       duration: +values.duration,

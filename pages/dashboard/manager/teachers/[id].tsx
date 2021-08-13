@@ -1,4 +1,5 @@
-import { Avatar, Card, Col, message, Row, Table, Tabs, Tag } from "antd";
+import { HeartFilled } from "@ant-design/icons";
+import { Avatar, Card, Col, List, message, Rate, Row, Table, Tabs } from "antd";
 import { ColumnType } from "antd/lib/table";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -6,13 +7,9 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import MainLayout from "../../../../components/layout/layout";
 import apiService from "../../../../shared/api/apiServices";
-import {
-  gutter,
-  interestSkillsColors,
-} from "../../../../shared/constants/config";
-import storage from "../../../../shared/storage";
+import { gutter } from "../../../../shared/constants/config";
 import { Course } from "../../../../shared/types/course";
-import { BaseType, StudentProfile } from "../../../../shared/types/student";
+import { TeacherResponse } from "../../../../shared/types/teacher";
 
 const TitleWrapper = styled.h3`
   color: #7356f1;
@@ -31,7 +28,7 @@ export async function getServerSideProps(context) {
 
 export default function Page(props: { id: number }) {
   const router = useRouter();
-  const [student, setStudent] = useState<StudentProfile>(null);
+  const [data, setData] = useState<TeacherResponse>(null);
   const [info, setInfo] = useState<{ label: string; value: string | number }[]>(
     []
   );
@@ -50,19 +47,29 @@ export default function Page(props: { id: number }) {
       dataIndex: "name",
       // eslint-disable-next-line react/display-name
       render: (value, record) => (
-        <Link href={`/dashboard/${storage.role}/courses/${record.id}`}>
-          {value}
-        </Link>
+        <Link href={`/dashboard/course/${record.id}`}>{value}</Link>
       ),
     },
     {
-      title: "Type",
-      dataIndex: "type",
-      render: (type: BaseType[]) => type.map((item) => item.name).join(","),
+      title: "Start Time",
+      dataIndex: "startTime",
     },
     {
-      title: "Join Time",
+      title: "Create Time",
       dataIndex: "ctime",
+    },
+    {
+      title: "Enjoy",
+      dataIndex: "star",
+      // eslint-disable-next-line react/display-name
+      render: (value) => (
+        <Rate
+          character={<HeartFilled />}
+          defaultValue={value}
+          disabled
+          style={{ color: "red" }}
+        />
+      ),
     },
   ];
 
@@ -70,28 +77,25 @@ export default function Page(props: { id: number }) {
     const param = +router.query.id || props.id;
     (async () => {
       try {
-        const { data } = await apiService.getStudentById(param);
-
-        if (!!data) {
+        const { data: newData } = await apiService.getTeacherById(param);
+        const { profile } = newData;
+        if (!!newData) {
           const info = [
-            { label: "Name", value: data.name },
-            { label: "Age", value: data.age },
-            { label: "Email", value: data.email },
-            { label: "Phone", value: data.phone },
+            { label: "Name", value: newData.name },
+            { label: "Country", value: newData.country },
+            { label: "Email", value: newData.email },
+            { label: "Phone", value: newData.phone },
           ];
           const about = [
-            { label: "Eduction", value: data.education },
-            { label: "Area", value: data.country },
-            { label: "Gender", value: data.gender === 1 ? "Male" : "Female" },
+            { label: "Birthday", value: profile?.birthday },
             {
-              label: "Member Period",
-              value: data.memberStartAt + " - " + data.memberEndAt,
+              label: "Gender",
+              value: profile.gender === 1 ? "Male" : "Female",
             },
-            { label: "Type", value: data.type.name },
-            { label: "Create Time", value: data.ctime },
-            { label: "Update Time", value: data.updateAt },
+            { label: "Create Time", value: newData.ctime },
+            { label: "Update Time", value: newData.updateAt },
           ];
-          setStudent(data);
+          setData(newData);
           setInfo(info);
           setAbout(about);
         }
@@ -109,7 +113,7 @@ export default function Page(props: { id: number }) {
             title={
               <Avatar
                 size={{ xs: 40, sm: 60, md: 80, lg: 100, xl: 120, xxl: 150 }}
-                src={student?.avatar}
+                src={data?.profile?.avatar}
               />
             }
             style={{ textAlign: "center" }}
@@ -123,7 +127,7 @@ export default function Page(props: { id: number }) {
               ))}
               <Col span={24}>
                 <b>Address</b>
-                <div>{student?.address}</div>
+                <div>{data?.profile?.address}</div>
               </Col>
             </Row>
           </Card>
@@ -146,31 +150,64 @@ export default function Page(props: { id: number }) {
                   ))}
                 </Row>
 
-                <TitleWrapper>Information</TitleWrapper>
+                <TitleWrapper>Skills</TitleWrapper>
 
-                <Row gutter={gutter}>
-                  <Col>
-                    {student?.interest.map((item, index) => (
-                      <Tag
-                        color={interestSkillsColors[index]}
-                        key={item}
-                        style={{ padding: "5px 10px" }}
-                      >
-                        {item}
-                      </Tag>
-                    ))}
-                  </Col>
-                </Row>
+                {data?.skills.map((item, index) => (
+                  <Row key={index} gutter={gutter} align="middle">
+                    <Col span={4}>
+                      <b>{item.name}:</b>
+                    </Col>
+                    <Col>
+                      <Rate disabled defaultValue={item.level} />
+                    </Col>
+                  </Row>
+                ))}
+
                 <TitleWrapper>Description</TitleWrapper>
 
                 <Row gutter={gutter}>
-                  <Col style={{ lineHeight: 2 }}>{student?.description}</Col>
+                  <Col style={{ lineHeight: 2 }}>
+                    {data?.profile?.description}
+                  </Col>
                 </Row>
+
+                <TitleWrapper>Education</TitleWrapper>
+
+                <List>
+                  {data?.profile?.education?.map((item, index) => (
+                    <List.Item extra={item.degree} key={index}>
+                      <List.Item.Meta
+                        title={item.startEnd.replace(" ", " To ")}
+                        description={item.level}
+                      ></List.Item.Meta>
+                    </List.Item>
+                  ))}
+                </List>
+
+                <TitleWrapper>Work Experience</TitleWrapper>
+
+                <List>
+                  {data?.profile?.workExperience?.map((item, index) => (
+                    <List.Item key={index}>
+                      <List.Item.Meta
+                        title={item.startEnd.replace(" ", " To ")}
+                        description={
+                          <Row>
+                            <Col span={4}>
+                              <b>{item.company}</b>
+                            </Col>
+                            <Col offset={1}>{item.post}</Col>
+                          </Row>
+                        }
+                      ></List.Item.Meta>
+                    </List.Item>
+                  ))}
+                </List>
               </TabPane>
 
               <TabPane tab="Courses" key="2">
                 <Table
-                  dataSource={student?.courses}
+                  dataSource={data?.courses}
                   columns={columns}
                   rowKey="id"
                 />

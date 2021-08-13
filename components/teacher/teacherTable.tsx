@@ -3,22 +3,17 @@ import { ColumnType, TablePaginationConfig } from "antd/lib/table";
 import React, { ChangeEvent, useEffect, useState } from "react";
 import TextLink from "antd/lib/typography/Link";
 import { debounce } from "lodash";
-import { formatDistanceToNow } from "date-fns";
 import { PlusOutlined } from "@ant-design/icons";
 import styled from "styled-components";
-// import apiService from "../../shared/api/apiServices";
-//--------------------------------------------
-//--------------------------------------------
-import * as apiService from "../../shared/api/apiServicesFunction";
+import apiService from "../../shared/api/apiServices";
 import {
-  BaseType,
-  Student,
-  StudentCourse,
-  StudentsRequest,
-  StudentsResponse,
-} from "../../shared/types/student";
+  Skill,
+  Teacher,
+  TeacherRequest,
+  TeachersResponse,
+} from "../../shared/types/teacher";
 import Input from "antd/lib/input";
-import AddEditStudent from "./addEdit";
+import AddEditTeacher from "./addEdit";
 import Link from "next/link";
 import { Country } from "../../shared/types/others";
 import { useListEffect } from "../../shared/utils/listHook";
@@ -35,24 +30,24 @@ const Search = styled(Input.Search)`
   display: block;
 `;
 
-export default function StudentTableTest() {
+export default function TeacherTable() {
   const [query, setQuery] = useState<string>("");
   const [showModal, setShowModal] = useState<boolean>(false);
   const [actionType, setActionType] = useState<string>("Add");
-  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
   const [countries, setCountries] = useState<Country[]>([]);
   const debouncedQuery = debounce(
     (event: ChangeEvent<HTMLInputElement>) => setQuery(event.target.value),
     1000
   );
   const { paginator, setPaginator, data, setData, total, setTotal } =
-    useListEffect<StudentsRequest, StudentsResponse, Student>(
-      apiService.getStudentsTest,
-      "students",
+    useListEffect<TeacherRequest, TeachersResponse, Teacher>(
+      apiService.getTeachers.bind(apiService),
+      "teachers",
       true,
       { query }
     );
-  const columns: ColumnType<Student>[] = [
+  const columns: ColumnType<Teacher>[] = [
     {
       title: "No.",
       key: "index",
@@ -62,15 +57,15 @@ export default function StudentTableTest() {
       title: "Name",
       dataIndex: "name",
       sortDirections: ["ascend", "descend"],
-      sorter: (pre: Student, next: Student) => {
+      sorter: (pre: Teacher, next: Teacher) => {
         const preCode = pre.name.charCodeAt(0);
         const nextCode = next.name.charCodeAt(0);
 
         return preCode > nextCode ? 1 : preCode === nextCode ? 0 : -1;
       },
       // eslint-disable-next-line react/display-name
-      render: (_, record: Student) => (
-        <Link href={`/dashboard/manager/students/${record.id}`} passHref>
+      render: (_, record: Teacher) => (
+        <Link href={`/dashboard/manager/teachers/${record.id}`} passHref>
           {record.name}
         </Link>
       ),
@@ -79,7 +74,7 @@ export default function StudentTableTest() {
       title: "Area",
       dataIndex: "country",
       filters: countries.map((item) => ({ text: item.en, value: item.en })),
-      onFilter: (value: string | number | boolean, record: Student) =>
+      onFilter: (value: string | number | boolean, record: Teacher) =>
         record.country.includes(value.toString()),
     },
     {
@@ -87,46 +82,37 @@ export default function StudentTableTest() {
       dataIndex: "email",
     },
     {
-      title: "Selected Curriculum",
-      dataIndex: "courses",
-      render: (courses: StudentCourse[]) =>
-        courses?.map((course) => course.name).join(","),
+      title: "Skill",
+      dataIndex: "skills",
+      render: (skills: Skill[]) => skills?.map((skill) => skill.name).join(","),
     },
     {
-      title: "Student Type",
-      dataIndex: "type",
-      filters: [
-        { text: "developer", value: "developer" },
-        { text: "tester", value: "tester" },
-      ],
-      onFilter: (value: string | number | boolean, record: Student) =>
-        record.type.name === value,
-      render: (type: BaseType) => type?.name,
+      title: "Course Amount",
+      dataIndex: "courseAmount",
     },
     {
-      title: "Join Time",
-      render: (record: Student) =>
-        formatDistanceToNow(new Date(record.createdAt), { addSuffix: true }),
+      title: "Phone",
+      dataIndex: "phone",
     },
     {
       title: "Action",
-      render: function showButton(record: Student) {
+      render: function showButton(record: Teacher) {
         return (
           <>
             <TextLink
               onClick={() => {
                 setShowModal(true);
                 setActionType("Edit");
-                setSelectedStudent(record);
+                setSelectedTeacher(record);
               }}
             >
               Edit{" "}
             </TextLink>
-            {/* <Popconfirm
+            <Popconfirm
               title="Are you sure to delete?"
               onConfirm={async () => {
                 try {
-                  const { data: isDeleted } = await apiService.deleteStudent(
+                  const { data: isDeleted } = await apiService.deleteTeacher(
                     record.id
                   );
                   if (isDeleted) {
@@ -144,7 +130,7 @@ export default function StudentTableTest() {
               cancelText="Cancel"
             >
               <TextLink>Delete</TextLink>
-            </Popconfirm> */}
+            </Popconfirm>
           </>
         );
       },
@@ -162,35 +148,35 @@ export default function StudentTableTest() {
     },
   };
 
-  const onAddOrEdit = (student: Student) => {
+  const onAddOrEdit = (teacher: Teacher) => {
     if (actionType === "Add") {
-      setData([student, ...data]);
+      setData([teacher, ...data]);
     } else {
-      const index = data.findIndex((item) => item.id === student.id);
+      const index = data.findIndex((item) => item.id === teacher.id);
 
-      data[index] = student;
+      data[index] = teacher;
       setData([...data]);
     }
     setShowModal(false);
-    setSelectedStudent(null);
+    setSelectedTeacher(null);
   };
   const onCancel = () => {
     setShowModal(false);
-    setSelectedStudent(null);
+    setSelectedTeacher(null);
   };
 
-  // useEffect(() => {
-  //   (async () => {
-  //     try {
-  //       const { data } = await apiService.getCountries();
-  //       if (!!data) {
-  //         setCountries(data);
-  //       }
-  //     } catch (error) {
-  //       message.error("Something Wrong!!!", 10);
-  //     }
-  //   })();
-  // }, []);
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data } = await apiService.getCountries();
+        if (!!data) {
+          setCountries(data);
+        }
+      } catch (error) {
+        message.error("Something Wrong!!!", 10);
+      }
+    })();
+  }, []);
 
   return (
     <>
@@ -219,7 +205,7 @@ export default function StudentTableTest() {
         loading={!data || data.length === 0}
       />
       <Modal
-        title={`${actionType} Student`}
+        title={`${actionType} Teacher`}
         visible={showModal}
         destroyOnClose={true}
         footer={[
@@ -228,9 +214,9 @@ export default function StudentTableTest() {
           </Button>,
         ]}
       >
-        <AddEditStudent
+        <AddEditTeacher
           actionType={actionType}
-          student={selectedStudent}
+          teacher={selectedTeacher}
           countries={countries}
           onSubmit={onAddOrEdit}
         />

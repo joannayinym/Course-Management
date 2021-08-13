@@ -15,6 +15,7 @@ import { FormListFieldData } from "antd/lib/form/FormList";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
 import apiService from "../../shared/api/apiServices";
+import { gutter } from "../../shared/constants/config";
 import { weekDays } from "../../shared/constants/course";
 import { UpdateScheduleRequest } from "../../shared/types/course";
 
@@ -48,23 +49,6 @@ export default function CourseSchedule({
   const [selectedWeekdays, setSelectedWeekdays] = useState<
     { fieldKey: number; value: string }[]
   >([]);
-
-  // const setSelectedDays = (name?: (string | number)[]) => {
-  //   const selected: { weekday: string; time: string }[] = form.getFieldValue(
-  //     "classTime" || []
-  //   );
-  //   let result = selected.map((item) => item?.weekday);
-
-  //   if (name) {
-  //     const value = form.getFieldValue(name);
-
-  //     result = result.filter((item) => item !== value);
-  //   }
-
-  //   setSelectedWeekdays([
-  //     ...selectedWeekdays.filter((item) => result.includes(item.value)),
-  //   ]);
-  // };
 
   const onFinish = async (values: ChapterFormValue) => {
     if (!courseId && !scheduleId) {
@@ -118,6 +102,8 @@ export default function CourseSchedule({
           form.setFieldsValue({
             chapters: data.chapters,
           });
+        } else {
+          form.setFieldsValue({ chapters: [{ name: "", content: "" }] });
         }
 
         if (classTimes && classTimes.length > 0) {
@@ -131,6 +117,8 @@ export default function CourseSchedule({
               value: item.weekday,
             }))
           );
+        } else {
+          form.setFieldsValue({ classTime: [{ weekday: "", time: "" }] });
         }
       }
     })();
@@ -145,7 +133,7 @@ export default function CourseSchedule({
         onFinish={onFinish}
         initialValues={initialValues}
       >
-        <Row gutter={[6, 16]}>
+        <Row gutter={gutter}>
           <Col span={12}>
             <h2>Chapters</h2>
             <Form.List name="chapters">
@@ -275,11 +263,6 @@ export default function CourseSchedule({
                             <MinusCircleOutlined
                               onClick={() => {
                                 if (fields.length > 1) {
-                                  // setSelectedDays([
-                                  //   "classTime",
-                                  //   field.name,
-                                  //   "weekday",
-                                  // ]);
                                   setSelectedWeekdays([
                                     ...selectedWeekdays.filter(
                                       (day) => day.fieldKey !== field.key
@@ -307,7 +290,6 @@ export default function CourseSchedule({
                           size="large"
                           disabled={fields.length >= 7}
                           onClick={() => {
-                            // setSelectedDays();
                             add();
                           }}
                           block

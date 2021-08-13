@@ -25,9 +25,19 @@ import {
   UpdateStudentRequest,
   UpdateStudentResponse,
 } from "../types/student";
-import { Teacher, TeacherRequest, TeacherResponse } from "../types/teacher";
+import {
+  AddTeacherRequest,
+  AddTeacherResponse,
+  Teacher,
+  TeacherRequest,
+  TeacherResponse,
+  TeachersResponse,
+  UpdateTeacherRequest,
+  UpdateTeacherResponse,
+} from "../types/teacher";
 import { IResponse, QueryParams } from "../types/type";
 import { LoginRequest, LoginResponse } from "../types/user";
+import { fieldMap } from "../utils/api-field-remap";
 
 type IPath = (string | number)[] | string | number;
 
@@ -132,6 +142,7 @@ class ApiService extends BaseApiService {
     );
   }
 
+  @fieldMap()
   async getStudentById(id: number): Promise<IResponse<StudentProfile>> {
     return this.get<IResponse<StudentProfile>>([RootPath.students, id]).then(
       this.showMessage()
@@ -203,19 +214,6 @@ class ApiService extends BaseApiService {
     );
   }
 
-  async getTeachers(req: TeacherRequest): Promise<IResponse<TeacherResponse>> {
-    return this.get<IResponse<TeacherResponse>>(
-      RootPath.teachers,
-      req as unknown as QueryParams
-    ).then(this.showMessage());
-  }
-
-  async getTeacherById(id: number): Promise<IResponse<Teacher>> {
-    return this.get<IResponse<Teacher>>(RootPath.teachers, {
-      id,
-    }).then(this.showMessage());
-  }
-
   async getCourseCode(): Promise<IResponse<CourseCode>> {
     return this.get<IResponse<CourseCode>>([
       RootPath.courses,
@@ -250,6 +248,44 @@ class ApiService extends BaseApiService {
       courseId,
       scheduleId,
     }).then(this.showMessage());
+  }
+
+  async getTeachers(req: TeacherRequest): Promise<IResponse<TeachersResponse>> {
+    return this.get<IResponse<TeachersResponse>>(
+      RootPath.teachers,
+      req as unknown as QueryParams
+    ).then(this.showMessage());
+  }
+
+  @fieldMap()
+  async getTeacherById(id: number): Promise<IResponse<TeacherResponse>> {
+    return this.get<IResponse<TeacherResponse>>([RootPath.teachers, id]).then(
+      this.showMessage()
+    );
+  }
+
+  async addTeacher(
+    req: AddTeacherRequest
+  ): Promise<IResponse<AddTeacherResponse>> {
+    return this.post<IResponse<AddTeacherResponse>>(
+      RootPath.teachers,
+      req
+    ).then(this.showMessage(true));
+  }
+
+  async updateTeacher(
+    req: UpdateTeacherRequest
+  ): Promise<IResponse<UpdateTeacherResponse>> {
+    return this.put<IResponse<UpdateTeacherResponse>>(
+      RootPath.teachers,
+      req
+    ).then(this.showMessage(true));
+  }
+
+  async deleteTeacher(id: number): Promise<IResponse<boolean>> {
+    return this.delete<IResponse<boolean>>([RootPath.teachers, id]).then(
+      this.showMessage(true)
+    );
   }
 }
 

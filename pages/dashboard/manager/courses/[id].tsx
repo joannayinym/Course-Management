@@ -6,6 +6,7 @@ import ClassTime from "../../../../components/course/classTime";
 import CourseOverview from "../../../../components/course/overview";
 import MainLayout from "../../../../components/layout/layout";
 import apiService from "../../../../shared/api/apiServices";
+import { gutter } from "../../../../shared/constants/config";
 import {
   CourseStatusBadge,
   CourseStatusColor,
@@ -114,13 +115,13 @@ export default function Page(props: { id: number }) {
 
   return (
     <MainLayout>
-      <Row gutter={[6, 16]}>
+      <Row gutter={gutter}>
         <Col span={8}>
           <CourseOverview
             {...courseData}
             cardProps={{ bodyStyle: { paddingBottom: 0 } }}
           >
-            <RowWrapper gutter={[6, 16]} justify="space-between" align="middle">
+            <RowWrapper gutter={gutter} justify="space-between" align="middle">
               {info.map((item, index) => (
                 <ColWrapper key={index} span={6}>
                   <b>{item.value}</b>
