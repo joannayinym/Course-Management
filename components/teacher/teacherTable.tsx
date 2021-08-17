@@ -56,6 +56,7 @@ export default function TeacherTable() {
     {
       title: "Name",
       dataIndex: "name",
+      align: "right",
       sortDirections: ["ascend", "descend"],
       sorter: (pre: Teacher, next: Teacher) => {
         const preCode = pre.name.charCodeAt(0);

@@ -17,6 +17,11 @@ import {
 } from "../types/course";
 import { Country } from "../types/others";
 import {
+  StatisticsOverviewResponse,
+  StatisticsType,
+  StudentStatistics,
+} from "../types/statistics";
+import {
   AddStudentRequest,
   AddStudentResponse,
   StudentProfile,
@@ -286,6 +291,25 @@ class ApiService extends BaseApiService {
     return this.delete<IResponse<boolean>>([RootPath.teachers, id]).then(
       this.showMessage(true)
     );
+  }
+
+  @fieldMap()
+  getStatisticsOverview(): Promise<IResponse<StatisticsOverviewResponse>> {
+    return this.get<IResponse<StatisticsOverviewResponse>>([
+      RootPath.statistics,
+      SubPath.overview,
+    ]).then(this.showMessage());
+  }
+
+  @fieldMap()
+  async getStatistics<T>(
+    type: StatisticsType,
+    userId?: number
+  ): Promise<IResponse<T>> {
+    return this.get<IResponse<T>>(
+      [RootPath.statistics, type],
+      !!userId ? { userId } : null
+    ).then(this.showMessage());
   }
 }
 

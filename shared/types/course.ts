@@ -12,7 +12,7 @@ export interface CourseType {
 export interface Course {
   id: number;
   name: string;
-  uid: string; //code
+  uid: string;
   detail: string;
   startTime: string;
   price: number;
