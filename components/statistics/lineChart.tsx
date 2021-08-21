@@ -33,6 +33,9 @@ export default function LineChart({ data }: LineChartProps) {
         "Dec",
       ],
     },
+    credits: {
+      enabled: false,
+    },
   });
 
   useEffect(() => {

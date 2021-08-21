@@ -1,5 +1,5 @@
 import { message } from "antd";
-import { AxiosError } from "axios";
+import axios, { AxiosError } from "axios";
 import axiosInstance from "../axiosInstance";
 import { RootPath, SubPath } from "../constants/apiPath";
 import {
@@ -311,6 +311,12 @@ class ApiService extends BaseApiService {
       !!userId ? { userId } : null
     ).then(this.showMessage());
   }
+
+  getWorld = async () => {
+    return await axios.get(
+      "https://code.highcharts.com/mapdata/custom/world-palestine-highres.geo.json"
+    );
+  };
 }
 
 export const apiService = new ApiService();

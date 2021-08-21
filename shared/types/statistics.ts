@@ -55,9 +55,9 @@ export interface CourseClassTimeStatistic extends Statistic {
 // export type CourseStatistics = StatisticsResponse<Course & Schedule, CourseClassTimeStatistic>;
 
 export interface CourseStatistics {
-  typeName: Statistic[];
+  type: Statistic[];
   ctime: Statistic[];
-  classTime: ClassTimeStatistics[];
+  classTime: CourseClassTimeStatistic[];
 }
 
 export interface SkillStatistic {
@@ -66,15 +66,20 @@ export interface SkillStatistic {
 
 export interface TeacherStatistics {
   country: Statistic[];
-  skill: Record<string, Statistic[]>;
+  skills: Record<string, Statistic[]>;
   workExperience: string[];
   ctime: Statistic[];
 }
 
 export interface StudentStatistics {
   country: Statistic[];
-  typeName: Statistic[];
+  type: Statistic[];
   courses: Statistic[];
   ctime: Statistic[];
   interest: Statistic[];
+}
+
+export interface CommonChartComponentProps<T = Statistic> {
+  data: T[];
+  title?: string;
 }
